@@ -1,0 +1,19 @@
+.origin_time {
+  font-size: small;
+  font-weight: lighter;
+}
+
+.stream {
+  max-width: 650px;
+  margin: 15px 35px;
+}
+
+.content.path {
+  font-size: small;
+  font-style: italic;
+}
+
+.repost {
+  font-size: small;
+  color: lightgreen;
+}

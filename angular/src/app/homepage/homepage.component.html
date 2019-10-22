@@ -1,0 +1,16 @@
+<div class="home_container" *ngIf="!authService.isLogin()">
+  <div class="home logo">
+    <img src="../../assets/icon/logo_transparent.png" alt="Logo"/>
+  </div>
+  <div class="home description">
+    Write nEXT
+  </div>
+  <div class="sign">
+    <a mat-raised-button color="primary" [routerLink]="['sign_up']">
+      Sign Up
+    </a>
+    <a mat-raised-button color="basic" [routerLink]="['login']">
+      Log In
+    </a>
+  </div>
+</div>

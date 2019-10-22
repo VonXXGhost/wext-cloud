@@ -1,0 +1,22 @@
+server:
+  port: 9005
+
+logging:
+  level:
+    root: debug
+
+eureka:
+  instance:
+    hostname: localhost
+  client:
+    serviceUrl:
+      defaultZone: http://${eureka.instance.hostname}:8061/eureka/
+
+servlet:
+  multipart:
+    max-file-size: -1
+    max-request-size: -1
+upload:
+  img-absolute-path: D://Study/Java/wextcould/resources-service/src/main/resources/static/imgs/
+  img-path: /images/
+  img-max-size: 10485760  # 10Mb

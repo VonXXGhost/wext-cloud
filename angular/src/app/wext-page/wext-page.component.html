@@ -1,0 +1,173 @@
+<div class="main_container">
+  <div class="detail">
+    <mat-card *ngIf="wextDetail else loading">
+      <mat-card-header>
+        <img mat-card-avatar class="user_icon" [src]="masterUser.iconUrl" [alt]="masterUser.screenName" *ngIf="masterUser.iconUrl" />
+        <img mat-card-avatar class="user_icon" src="assets/icon/default_user_icon.png" alt="default" *ngIf="!masterUser.iconUrl" />
+        <mat-card-title>{{masterUser.nickname}}</mat-card-title>
+        <mat-card-subtitle>
+          <a [routerLink]="['/user', masterUser.screenName]">
+            @{{masterUser.screenName}}
+          </a>
+        </mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        <p class="content path">
+          <a [routerLink]="'/path/' + wextDetail.fullPath.substr(1)">
+            {{wextDetail.fullPath}}
+          </a>
+        </p>
+        <p class="wext_content">
+          {{wextDetail.text}}
+        </p>
+        <div class="content pics">
+          <img [src]="wextDetail.picList[0]" [alt]="wextDetail.picList[0]" *ngIf="wextDetail.picList && wextDetail.picList.length > 0" />
+        </div>
+        <div class="origin_time">
+          <p>
+            {{wextDetail.createdTime | date: 'medium'}}
+          </p>
+        </div>
+      </mat-card-content>
+
+      <mat-card-actions>
+        <button mat-button class="not_do" (dblclick)="doRepost()" *ngIf="!hasRepost">
+          转发&ensp;{{wextDetail.repostCount}}
+        </button>
+        <button mat-button class="have_do" (dblclick)="doUnrepost()" *ngIf="hasRepost">
+          转发&ensp;{{wextDetail.repostCount}}
+        </button>
+
+        <button mat-button (click)="switchToComment()">
+          评论&ensp;{{wextDetail.commentCount}}
+        </button>
+
+        <button mat-button (click)="switchToLike()" (dblclick)="doLike()" class="not_do" *ngIf="!hasLike">
+          <mat-icon svgIcon="thumb_up"></mat-icon>&ensp;{{wextDetail.likeCount}}
+        </button>
+        <button mat-button (click)="switchToLike()" (dblclick)="doUnlike()" class="have_do" *ngIf="hasLike">
+          <mat-icon svgIcon="thumb_up"></mat-icon>&ensp;{{wextDetail.likeCount}}
+        </button>
+
+        <button mat-button (click)="deleteWext()" *ngIf="loginUser && loginUser.id === wextDetail.userId">
+          删除
+        </button>
+      </mat-card-actions>
+    </mat-card>
+
+    <div class="comment_container" *ngIf="type === 'comment'">
+      <div class="comment_write">
+        <form>
+          <mat-form-field>
+            <textarea matInput [(ngModel)]="commentContent" placeholder="Write comment" maxlength="300" name="commentContent"></textarea>
+            <mat-hint align="end">{{commentContent.length}} / 300</mat-hint>
+          </mat-form-field>
+          <button mat-button color="primary" (click)="doComment()"
+                  [disabled]="commentContent.length === 0 || commentContent.length >= 300">
+            提交评论
+          </button>
+        </form>
+      </div>
+
+      <div class="comment_list" *ngIf="comments && comments.length > 0">
+        <mat-card *ngFor="let comment of comments">
+          <mat-card-header *ngIf="comment.userInfo">
+            <img mat-card-avatar class="user_icon" [src]="comment.userInfo.iconUrl" [alt]="comment.userInfo.screenName" *ngIf="comment.userInfo.iconUrl" />
+            <img mat-card-avatar class="user_icon" src="assets/icon/default_user_icon.png" alt="default" *ngIf="!comment.userInfo.iconUrl" />
+            <mat-card-title>{{comment.userInfo.nickname}}</mat-card-title>
+            <mat-card-subtitle>
+              <a [routerLink]="['/user', comment.userInfo.screenName]">
+                @{{comment.userInfo.screenName}}
+              </a>
+            </mat-card-subtitle>
+          </mat-card-header>
+
+          <mat-card-content>
+            <p class="content floor">
+              #{{comment.floor}}
+            </p>
+            <p class="wext_content">
+              {{comment.content}}
+            </p>
+            <div class="origin_time">
+              <p>
+                {{comment.createdTime | date: 'medium'}}
+              </p>
+            </div>
+          </mat-card-content>
+
+          <mat-card-actions *ngIf="loginUser && comment.userId === loginUser.id">
+            <button mat-button (click)="deleteComment(comment.id)">
+              删除评论
+            </button>
+          </mat-card-actions>
+
+          <mat-divider></mat-divider>
+        </mat-card>
+
+        <div class="page">
+          <a mat-button (click)="setPage(1)">
+            首页
+          </a>
+          <a mat-button (click)="setPage(page - 1)" *ngIf="page > 1">
+            上一页
+          </a>
+          <a mat-button (click)="setPage(page + 1)" *ngIf="page < totalPage">
+            下一页
+          </a>
+          <a mat-button (click)="setPage(totalPage)">
+            末页-{{totalPage}}页
+          </a>
+        </div>
+      </div>
+
+      <div class="comment_list" *ngIf="comments && comments.length === 0">
+        暂时无人评论
+      </div>
+
+    </div>
+
+
+
+<!---->
+
+    <div class="like_container" *ngIf="type === 'like' && likeUsers && likeUsers.length > 0">
+      <mat-card *ngFor="let user of likeUsers">
+        <mat-card-header>
+          <img mat-card-avatar class="user_icon" [src]="user.iconUrl" [alt]="user.screenName" *ngIf="user.iconUrl" />
+          <img mat-card-avatar class="user_icon" src="assets/icon/default_user_icon.png" alt="default" *ngIf="!user.iconUrl" />
+          <mat-card-title>{{user.nickname}}</mat-card-title>
+          <mat-card-subtitle>
+            <a [routerLink]="['/user', user.screenName]">
+              @{{user.screenName}}
+            </a>
+          </mat-card-subtitle>
+        </mat-card-header>
+      </mat-card>
+
+      <div class="page">
+        <a mat-button (click)="setPage(1)">
+          首页
+        </a>
+        <a mat-button (click)="setPage(page - 1)" *ngIf="page > 1">
+          上一页
+        </a>
+        <a mat-button (click)="setPage(page + 1)" *ngIf="page < totalPage">
+          下一页
+        </a>
+        <a mat-button (click)="setPage(totalPage)">
+          末页-{{totalPage}}页
+        </a>
+      </div>
+    </div>
+    <div class="like_container" *ngIf="type === 'like' && likeUsers && likeUsers.length === 0">
+      暂时无人收藏
+    </div>
+
+    <ng-template #loading>
+      加载中...
+    </ng-template>
+  </div>
+</div>
+

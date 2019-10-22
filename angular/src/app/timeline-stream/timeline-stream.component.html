@@ -1,0 +1,81 @@
+<div *ngIf="items && items.length > 0 else nodata" class="stream">
+  <mat-card class="timeline item" *ngFor="let item of items">
+    <div class="repost" *ngIf="item.repost">
+      <p class="repost_info">
+        <a class="repost user" [routerLink]="['/user', item.repostUser.screenName]">
+          {{item.repostUser.nickname}}
+        </a>
+        &emsp;转发了
+      </p>
+    </div>
+
+    <mat-card-header>
+      <img mat-card-avatar class="user_icon" [src]="item.user.iconUrl" [alt]="item.user.screenName" *ngIf="item.user.iconUrl" />
+      <img mat-card-avatar class="user_icon" src="assets/icon/default_user_icon.png" alt="default" *ngIf="!item.user.iconUrl" />
+      <mat-card-title>{{item.user.nickname}}</mat-card-title>
+      <mat-card-subtitle>
+        <a [routerLink]="['/user', item.user.screenName]">
+          @{{item.user.screenName}}
+        </a>
+      </mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <p class="content path">
+        <a [routerLink]="'/path/' + item.wext.fullPath.substr(1)">
+          {{item.wext.fullPath}}
+        </a>
+      </p>
+      <p class="wext_content">
+        {{item.wext.text}}
+      </p>
+      <div class="content pics">
+        <img [src]="baseAPIUrl + item.wext.picList[0].substr(1)" [alt]="item.wext.picList[0]" *ngIf="item.wext.picList && item.wext.picList.length > 0" />
+      </div>
+      <div class="origin_time">
+        <p>
+          {{item.wext.createdTime | date: 'medium'}}
+        </p>
+      </div>
+    </mat-card-content>
+
+    <mat-card-actions>
+      <button mat-button [routerLink]="['/wext', item.wext.id]">
+        详情
+      </button>
+      <button mat-button>
+        转发&ensp;{{item.wext.repostCount}}
+      </button>
+      <button mat-button>
+        评论&ensp;{{item.wext.commentCount}}
+      </button>
+      <button mat-button>
+        <mat-icon svgIcon="thumb_up"></mat-icon>&ensp;{{item.wext.likeCount}}
+      </button>
+    </mat-card-actions>
+
+    <mat-divider></mat-divider>
+  </mat-card>
+
+</div>
+
+<ng-template #nodata>
+  <div *ngIf="empty">
+    已到达尽头
+  </div>
+  <div *ngIf="!empty">
+    加载中...
+  </div>
+</ng-template>
+
+<div class="page">
+  <a mat-button [routerLink]="[{page: '1'}]">
+    首页
+  </a>
+  <a mat-button [routerLink]="[{page: (page - 1).toString()}]" *ngIf="page > 1">
+    上一页
+  </a>
+  <a mat-button [routerLink]="[{page: (page + 1).toString()}]" *ngIf="!empty">
+    下一页
+  </a>
+</div>

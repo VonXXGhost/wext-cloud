@@ -1,0 +1,42 @@
+<div class="user_info" *ngIf="userInfo">
+  <mat-card>
+    <mat-card-header>
+      <img mat-card-avatar class="user_icon" [src]="userInfo.info.iconUrl" [alt]="userInfo.info.screenName" *ngIf="userInfo.info.iconUrl" />
+      <img mat-card-avatar class="user_icon" src="assets/icon/default_user_icon.png" alt="default" *ngIf="!userInfo.info.iconUrl" />
+      <mat-card-title>{{userInfo.info.nickname}}</mat-card-title>
+      <mat-card-subtitle>
+        <a [routerLink]="['/user', userInfo.info.screenName]">
+          @{{userInfo.info.screenName}}
+        </a>
+      </mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <div class="user_description main">
+        {{userInfo.info.profile || '用户暂无简介'}}
+      </div>
+      <div class="user_description follow_data">
+        <span class="following" routerLink="./following">
+          正在关注:{{userInfo.info.followings}}
+        </span>
+        <span class="follower" routerLink="./follower">
+          追随者:{{userInfo.info.followers}}
+        </span>
+        <span class="relationship" *ngIf="userInfo.relationship">
+          {{relationShow[userInfo.relationship]}}
+        </span>
+        <mat-card-actions *ngIf="authService.isLogin() && authService.getLoginUser().id !== userInfo.info.id">
+          <button mat-flat-button *ngIf="userInfo.relationship === 'following'"
+                  color="warn" (click)="unfollowUser()">
+            取消关注
+          </button>
+          <button mat-flat-button *ngIf="userInfo.relationship && userInfo.relationship !== 'following'"
+                  color="primary" (click)="followUser()">
+            关注
+          </button>
+        </mat-card-actions>
+      </div>
+    </mat-card-content>
+
+  </mat-card>
+</div>

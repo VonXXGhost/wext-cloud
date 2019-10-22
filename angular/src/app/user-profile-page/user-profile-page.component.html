@@ -1,0 +1,15 @@
+<app-user-info-panel [userInfo]="userInfo"></app-user-info-panel>
+<div class="dm_editor" *ngIf="authService.isLogin() && authService.getLoginUser().id !== userInfo.info.id">
+  <form>
+    <mat-form-field>
+      <textarea matInput [(ngModel)]="msgContent" placeholder="向用户发送私信" maxlength="1000" name="msgContent"></textarea>
+      <mat-hint align="end">{{msgContent.length}} / 1000</mat-hint>
+    </mat-form-field>
+    <button mat-button color="primary" (click)="sendDM()"
+            [disabled]="msgContent.length === 0 || msgContent.length >= 1000">
+      发送
+    </button>
+  </form>
+</div>
+<router-outlet></router-outlet>
+

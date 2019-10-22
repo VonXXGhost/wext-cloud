@@ -1,0 +1,52 @@
+<!--<mat-sidenav-container class="sidenav-container">-->
+<!--  <mat-sidenav #drawer class="sidenav" fixedInViewport-->
+<!--      [attr.role]="(isHandset$ | async) ? 'dialog' : 'navigation'"-->
+<!--      [mode]="(isHandset$ | async) ? 'over' : 'side'"-->
+<!--      [opened]="(isHandset$ | async) === false">-->
+<!--    <mat-toolbar>Menu</mat-toolbar>-->
+<!--    <mat-nav-list>-->
+<!--      <a mat-list-item href="#">Link 1</a>-->
+<!--      <a mat-list-item href="#">Link 2</a>-->
+<!--      <a mat-list-item href="#">Link 3</a>-->
+<!--    </mat-nav-list>-->
+<!--  </mat-sidenav>-->
+<!--  <mat-sidenav-content>-->
+<!--    <mat-toolbar color="primary">-->
+<!--      <button-->
+<!--        type="button"-->
+<!--        aria-label="Toggle sidenav"-->
+<!--        mat-icon-button-->
+<!--        (click)="drawer.toggle()"-->
+<!--        *ngIf="isHandset$ | async">-->
+<!--        <mat-icon aria-label="Side nav toggle icon">menu</mat-icon>-->
+<!--      </button>-->
+<!--      <span>Wext</span>-->
+<!--    </mat-toolbar>-->
+<!--    &lt;!&ndash; Add Content Here &ndash;&gt;-->
+<!--    -->
+<!--  </mat-sidenav-content>-->
+<!--</mat-sidenav-container>-->
+<mat-toolbar color="primary">
+  <a [routerLink]="['/']">
+    <h1>
+      Wext
+    </h1>
+  </a>
+  <app-top-menu></app-top-menu>
+  <div class="right_kit sign_kit" *ngIf="!authService.isLogin()">
+    <a mat-button [routerLink]="['sign_up']">
+      注册
+    </a>
+    <a mat-button [routerLink]="['login']">
+      登录
+    </a>
+  </div>
+  <div class="right_kit log_out" *ngIf="!!authService.isLogin()">
+    <span class="login_user" *ngIf="$loginUser" [routerLink]="['user', $loginUser.screenName]">
+      欢迎，{{$loginUser.screenName}}
+    </span>
+    <a mat-button (click)="authService.logOut()">
+      退出登录
+    </a>
+  </div>
+</mat-toolbar>

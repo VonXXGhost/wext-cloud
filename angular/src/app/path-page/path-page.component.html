@@ -1,0 +1,18 @@
+<div class="editor_container">
+  <div class="now_path">
+    {{path}}
+  </div>
+  <div class="editor">
+    <form>
+      <mat-form-field>
+        <textarea matInput [(ngModel)]="wextContent" placeholder="Write comment" maxlength="3000" name="commentContent"></textarea>
+        <mat-hint align="end">{{wextContent.length}} / 3000</mat-hint>
+      </mat-form-field>
+      <button mat-button color="primary" (click)="doWext()"
+              [disabled]="wextContent.length === 0 || wextContent.length >= 3000">
+        发布
+      </button>
+    </form>
+  </div>
+</div>
+<app-timeline-stream pageType="path" [path]="path"></app-timeline-stream>

@@ -1,0 +1,9 @@
+<ul>
+  <li *ngFor="let item of menuItems">
+    <a [routerLink]="item.router">
+      <span>
+        {{item.name}}
+      </span>
+    </a>
+  </li>
+</ul>

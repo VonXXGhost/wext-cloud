@@ -1,0 +1,22 @@
+<div class="login_container">
+  <form (ngSubmit)="login()" #loginForm="ngForm">
+    <mat-form-field>
+      <input matInput placeholder="用户名/邮箱" id="username" required
+             [(ngModel)]="request.username" name="username">
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label>密码</mat-label>
+      <input matInput type="password" id="password" required
+             [(ngModel)]="request.password" name="password">
+    </mat-form-field>
+
+    <button mat-button color="primary" type="submit"
+            [disabled]="!loginForm.form.valid">
+      登录
+    </button>
+
+    <mat-error *ngIf="errorMsg">
+      {{errorMsg}}
+    </mat-error>
+  </form>
+</div>

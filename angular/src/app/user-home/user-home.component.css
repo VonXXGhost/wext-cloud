@@ -1,0 +1,7 @@
+.uploaded_pic {
+  max-width: 400px;
+}
+.editor form {
+  display: flex;
+  flex-direction: column;
+}

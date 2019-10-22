@@ -1,0 +1,23 @@
+<div class="editor_container">
+  <div class="now_path">
+    /
+  </div>
+  <div class="editor">
+    <form>
+      <mat-form-field>
+        <textarea matInput [(ngModel)]="wextContent" placeholder="Write comment" maxlength="3000" name="commentContent"></textarea>
+        <mat-hint align="end">{{wextContent.length}} / 3000</mat-hint>
+      </mat-form-field>
+      <label>图片附件：</label>
+      <input type="file" id="pic_upload_input" name="pic_file" (change)="picChange(file.files.item(0))" #file>
+      <div class="uploaded_pic" *ngIf="picURL">
+        <img [src]="picURL" alt="图片预览">
+      </div>
+      <button mat-button color="primary" (click)="doWext()"
+              [disabled]="wextContent.length === 0 || wextContent.length >= 3000">
+        发布
+      </button>
+    </form>
+  </div>
+</div>
+<app-timeline-stream pageType="user-home"></app-timeline-stream>

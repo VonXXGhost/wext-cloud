@@ -1,0 +1,130 @@
+<div class="main_container">
+  <mat-sidenav-container>
+    <mat-sidenav class="left" mode="side" opened>
+      <div class="nav-item">
+        <button mat-button (click)="switchToRec()">
+          收件箱
+        </button>
+      </div>
+      <div class="nav-item">
+        <button mat-button (click)="switchToSends()">
+          发件箱
+        </button>
+      </div>
+    </mat-sidenav>
+    <mat-sidenav position="end" *ngIf="dmType === DMTypes.receives" mode="side" opened>
+      <button mat-button class="read_all" (click)="setAllRead()" color="primary">
+        全部标记为已读
+      </button>
+    </mat-sidenav>
+
+    <mat-sidenav-content>
+      <div class="content_container" *ngIf="dmType === DMTypes.receives">
+        <div class="messages" *ngIf="messages else loading">
+          <mat-card *ngIf="messages.length === 0">
+            <mat-card-content>
+              暂无收信
+            </mat-card-content>
+          </mat-card>
+          <mat-card *ngFor="let message of messages">
+            <mat-card-header>
+              <img mat-card-avatar class="user_icon" [src]="message.userInfoFrom.iconUrl" [alt]="message.userInfoFrom.screenName" *ngIf="message.userInfoFrom && message.userInfoFrom.iconUrl" />
+              <img mat-card-avatar class="user_icon" src="assets/icon/default_user_icon.png" alt="default" *ngIf="!message.userInfoFrom.iconUrl" />
+              <mat-card-title>{{message.userInfoFrom.nickname}}&ensp;>>></mat-card-title>
+              <mat-card-subtitle>
+                <a [routerLink]="['/user', message.userInfoFrom.screenName]">
+                  @{{message.userInfoFrom.screenName}}
+                </a>
+              </mat-card-subtitle>
+            </mat-card-header>
+
+            <mat-card-content>
+              <p class="message_content">
+                {{message.content}}
+              </p>
+              <div class="origin_time">
+                <p>
+                  {{message.createdTime | date: 'medium'}}
+                </p>
+              </div>
+            </mat-card-content>
+
+            <mat-card-actions>
+              <button mat-button *ngIf="!message.haveRead" color="primary"
+                      (click)="setRead(message.id)">
+                标记为已读
+              </button>
+              <button mat-button *ngIf="message.haveRead">
+                已读
+              </button>
+            </mat-card-actions>
+          </mat-card>
+        </div>
+        <ng-template class="loading" #loading>
+          加载中…
+        </ng-template>
+      </div>
+
+      <div class="content_container" *ngIf="dmType === DMTypes.sends">
+        <div class="messages" *ngIf="messages else loading">
+          <mat-card *ngIf="messages.length === 0">
+            <mat-card-content>
+              暂无发信
+            </mat-card-content>
+          </mat-card>
+          <mat-card *ngFor="let message of messages">
+            <mat-card-header>
+              <img mat-card-avatar class="user_icon" [src]="message.userInfoTo.iconUrl" [alt]="message.userInfoTo.screenName" *ngIf="message.userInfoTo && message.userInfoTo.iconUrl" />
+              <img mat-card-avatar class="user_icon" src="assets/icon/default_user_icon.png" alt="default" *ngIf="!message.userInfoTo.iconUrl" />
+              <mat-card-title>>>>&ensp;{{message.userInfoTo.nickname}}</mat-card-title>
+              <mat-card-subtitle>
+                <a [routerLink]="['/user', message.userInfoTo.screenName]">
+                  @{{message.userInfoTo.screenName}}
+                </a>
+              </mat-card-subtitle>
+            </mat-card-header>
+
+            <mat-card-content>
+              <p class="message_content">
+                {{message.content}}
+              </p>
+              <div class="origin_time">
+                <p>
+                  {{message.createdTime | date: 'medium'}}
+                </p>
+              </div>
+            </mat-card-content>
+
+            <mat-card-actions>
+              <button mat-button *ngIf="!message.haveRead" color="primary">
+                对方未读
+              </button>
+              <button mat-button *ngIf="message.haveRead">
+                对方已读
+              </button>
+              <button mat-button (click)="delMsg(message.id)">
+                删除私信
+              </button>
+            </mat-card-actions>
+          </mat-card>
+        </div>
+        <ng-template class="loading" #loading>
+          加载中…
+        </ng-template>
+      </div>
+
+      <div class="page">
+        <button mat-button (click)="changePage(1)">
+          首页
+        </button>
+        <button mat-button (click)="changePage(page - 1)" *ngIf="page > 1">
+          上一页
+        </button>
+        <button mat-button (click)="changePage(page + 1)" *ngIf="messages && messages.length > 0">
+          下一页
+        </button>
+      </div>
+    </mat-sidenav-content>
+
+  </mat-sidenav-container>
+</div>
