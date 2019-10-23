@@ -84,10 +84,13 @@ public class UserService {
         return user;
     }
 
-    public List<User> getUserByIds(@NonNull Collection ids) {
+    public Map<Long, User> getUserByIds(@NonNull Collection<Long> ids) {
         List<User> users = this.userRepository.findByIdIn(ids);
         log.debug(users.toString());
-        return users;
+        Map<Long, User> result = new HashMap<>(users.size());
+        users.forEach(user -> result.put(user.getId(), user));
+        log.debug(result.toString());
+        return result;
     }
 
     @Transactional
@@ -160,6 +163,14 @@ public class UserService {
     public UserInfoItem getUserInfo(@NonNull Long id) {
         User user = getUserById(id);
         return getUserInfo(user);
+    }
+
+    public Map<Long, UserInfoItem> getUsersInfo(@NonNull Collection<Long> ids) {
+        var users = getUserByIds(ids);
+        Map<Long, UserInfoItem> results = new HashMap<>(users.size());
+        users.forEach((id, user) ->
+                results.put(id, getUserInfo(user)));
+        return results;
     }
 
     public List<Long> getUserFollowingIds(@NonNull Long id, Long page, Integer pageSize) {

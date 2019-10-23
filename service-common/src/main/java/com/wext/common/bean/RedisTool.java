@@ -4,6 +4,7 @@ import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -212,6 +213,15 @@ public class RedisTool<V> {
         } catch (Exception e) {
             log.error(e.getMessage());
             return false;
+        }
+    }
+
+    public Long zsetAdd(@NonNull String key, Set<ZSetOperations.TypedTuple<V>> sets) {
+        try {
+            return redisTemplate.opsForZSet().add(key, sets);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return -1L;
         }
     }
 

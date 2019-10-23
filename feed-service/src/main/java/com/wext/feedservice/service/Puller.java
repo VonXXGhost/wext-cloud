@@ -10,14 +10,16 @@ import com.wext.common.utils.WextTool;
 import com.wext.feedservice.client.RepostService;
 import com.wext.feedservice.client.UserService;
 import com.wext.feedservice.client.WextService;
+import com.wext.feedservice.config.RedisKeyPrefixs;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.DefaultTypedTuple;
+import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -31,18 +33,22 @@ public class Puller {
     private RedisTool<String> stringRedisTool;
     private RedisTool<Object> objectRedisTool;
 
-    private static final long pathFeedTTL = 5 * 60; // path feed存活时间 3小时    测试5分钟
-    private static final long wextTTL = 10 * 60; // wext存活时间 45分钟    测试10分钟
-    private static final long userEntityTTL = wextTTL; // user信息存活时间和wext相等
-    private static final long timelineFeedTTl = 10 * 60; // timeline feed存活时间 72小时    测试10分钟
+    @Value("${wext.keyTTL.pathFeed}")
+    private long pathFeedTTL; // path// feed存活时间
+
+    @Value("${wext.keyTTL.wextItem}")
+    private long wextTTL; // wext存活时间
+
+    @Value("${wext.keyTTL.userEntity}")
+    private long userEntityTTL; // user信息存活时间
+
+    @Value("${wext.keyTTL.timelineFeed}")
+    private long timelineFeedTTl; // timeline feed存活时间
+
     private static final int defaultPageSize = 100;
 
-    private static final String wextKeyPrefix = "wext:wext::";
-    private static final String userEntityKeyPrefix = "wext:user:entity::";
-    private static final String pathFeedKeyPrefix = "wext:path:feed::";
-    private static final String profileFeedKeyPrefix = "wext:user:profile:feed::";
-    private static final String userTimelineFeedKeyPrefix = "wext:user:timeline:feed::";
-
+    private Queue<Long> userIDBuffer = new LinkedList<>();  // 待读取sql写入redis的用户id
+    private Queue<String> wextIDBuffer = new LinkedList<>();  // 待读取sql写入redis的wext id
 
     @Autowired
     public Puller(WextService wextService, UserService userService, RepostService repostService, RedisTool<WextDTO> wextRedisTool, RedisTool<String> stringRedisTool, RedisTool<Object> objectRedisTool) {
@@ -58,7 +64,7 @@ public class Puller {
      * 拉取wext
      */
     public WextDTO pullWext(@NonNull String wextID) {
-        String wextKey = wextKeyPrefix + wextID;
+        String wextKey = RedisKeyPrefixs.wextKeyPrefix + wextID;
         WextDTO wext;
         if (wextRedisTool.hasKey(wextKey)) {
             // 存在时直接读取
@@ -74,11 +80,40 @@ public class Puller {
         return wext;
     }
 
+    private WextDTO pullWext(@NonNull String wextID, boolean fastModel) {
+        if (fastModel) {
+            String wextKey = RedisKeyPrefixs.wextKeyPrefix + wextID;
+            WextDTO wext = wextRedisTool.get(wextKey);
+            if (wext == null) {
+                // 不存在时放入缓存队列
+                wextIDBuffer.offer(wextID);
+            } else {
+                wextRedisTool.expire(wextKey, wextTTL); // 更新缓存时间
+            }
+            return wext;
+        } else {
+            return pullWext(wextID);
+        }
+    }
+
+    private Map<String, WextDTO> flushWextIDs() {
+        var wids = new LinkedList<String>();
+        while (!wextIDBuffer.isEmpty()) {   // 拷贝并清空buffer，预防可能的线程不安全情况发生
+            wids.add(wextIDBuffer.poll());
+        }
+        var wexts = wextService.getWexts(wids);
+        wexts.forEach((id, wext) -> {   // 存入到redis中
+            String wextKey = RedisKeyPrefixs.wextKeyPrefix + id;
+            wextRedisTool.set(wextKey, wext, wextTTL);
+        });
+        return wexts;
+    }
+
     /**
      * 拉取用户综合信息
      */
     public UserInfoItem pullUserInfo(@NonNull Long userID) {
-        String userKey = userEntityKeyPrefix + userID;
+        String userKey = RedisKeyPrefixs.userEntityKeyPrefix + userID;
         UserInfoItem user = (UserInfoItem) objectRedisTool.get(userKey);
         if (user == null) {
             // 不存在时的情况，建立
@@ -92,12 +127,46 @@ public class Puller {
     }
 
     /**
+     * 拉取用户综合信息
+     *
+     * @param fastModel: 开启后如果未击中缓存，直接返回null
+     */
+    private UserInfoItem pullUserInfo(@NonNull Long userID, boolean fastModel) {
+        if (fastModel) {
+            String userKey = RedisKeyPrefixs.userEntityKeyPrefix + userID;
+            UserInfoItem user = (UserInfoItem) objectRedisTool.get(userKey);
+            if (user == null) {
+                // 不存在时放入缓存队列
+                userIDBuffer.offer(userID);
+            } else {
+                objectRedisTool.expire(userKey, userEntityTTL); // 更新缓存时间
+            }
+            return user;
+        } else {
+            return pullUserInfo(userID);
+        }
+    }
+
+    private Map<Long, UserInfoItem> flushUserIDs() {
+        var uids = new LinkedList<Long>();
+        while (!userIDBuffer.isEmpty()) {   // 拷贝并清空buffer，预防可能的线程不安全情况发生
+            uids.add(userIDBuffer.poll());
+        }
+        var userInfos = userService.getUserInfosByIds(uids);
+        userInfos.forEach((id, info) -> {   // 存入到redis中
+            String userKey = RedisKeyPrefixs.userEntityKeyPrefix + id;
+            objectRedisTool.set(userKey, info, userEntityTTL);
+        });
+        return userInfos;
+    }
+
+    /**
      * 拉取节点下的最新wext
      */
     public List<TimelineItem> pullItemsOfPath(@NonNull String fullPath,
                                               Integer page, Integer pageSize, String lastWextID) {
         // 最多缓存500条
-        String feedKey = pathFeedKeyPrefix + fullPath;
+        String feedKey = RedisKeyPrefixs.pathFeedKeyPrefix + fullPath;
         List<String> feedIDs;
         log.debug(feedKey);
         if (stringRedisTool.hasKey(feedKey)) {
@@ -109,47 +178,52 @@ public class Puller {
             feedIDs = wextService.getWextsByPrefix(fullPath, 1, 500).stream()
                     .map(FeedTool::geneFeedID)   // feedID生成
                     .collect(Collectors.toList());  // 包含子节点
-            feedIDs.forEach(feedID ->
-                    stringRedisTool.zsetAdd(feedKey, feedID, - FeedTool.getTimestampFromFeedID(feedID).doubleValue()));    // 放入到redis中，score为负数
+            Set<ZSetOperations.TypedTuple<String>> feedTupSets = feedIDs.stream()
+                    .map(feedID ->
+                            new DefaultTypedTuple<String>(feedID,
+                                    -FeedTool.getTimestampFromFeedID(feedID).doubleValue()))  // 放入到redis中，score为负数
+                    .collect(Collectors.toSet());
+            stringRedisTool.zsetAdd(feedKey, feedTupSets);
+//            feedIDs.forEach(feedID ->
+//                    stringRedisTool.zsetAdd(feedKey, feedID, - FeedTool.getTimestampFromFeedID(feedID).doubleValue()));
         }
         stringRedisTool.expire(feedKey, pathFeedTTL); // 更新feed缓存时间
 
         // 截取分析
-        List<String> result;
+        List<String> resultFeedIDs;
         if (pageSize == null || pageSize < 1) {
             pageSize = defaultPageSize;
         }
         if (lastWextID != null) {   // 优先使用id参数
-            result = FeedTool.feedIDFilter(feedIDs, lastWextID);
-            result = result.subList(0, pageSize);
-            log.debug(result.toString());
+            resultFeedIDs = FeedTool.feedIDFilter(feedIDs, lastWextID);
+            resultFeedIDs = resultFeedIDs.subList(0, pageSize);
+            log.debug(resultFeedIDs.toString());
         } else {
             if (page == null || page < 1) {
                 page = 1;
             }
 
             if (feedIDs.size() >= page * pageSize) {   // 边界处理
-                result = feedIDs.subList((page - 1) * pageSize, page * pageSize);
+                resultFeedIDs = feedIDs.subList((page - 1) * pageSize, page * pageSize);
             } else if (feedIDs.size() >= (page - 1) * pageSize) {
-                result = feedIDs.subList((page - 1) * pageSize, feedIDs.size());
+                resultFeedIDs = feedIDs.subList((page - 1) * pageSize, feedIDs.size());
             } else {
-                result = new ArrayList<>();
+                resultFeedIDs = new ArrayList<>();
             }
 
-            log.debug(result.toString());
+            log.debug(resultFeedIDs.toString());
         }
 
         // 获取对应wext
-//        List<Wext> wexts = result.stream()
+//        List<Wext> wexts = resultFeedIDs.stream()
 //                .map(this::pullWext).collect(Collectors.toList());  // pullWext中已含有时间更新
 //        log.debug(wexts.toString());
 
         // 获取对应user并转换为TimelineItem
-        List<TimelineItem> items = result.stream()
-//                .map(wext ->
-//                        new TimelineItem(wext, false, pullUserInfo(wext.getUserId()), null, wext.getCreatedTime()))
-                .map(this::getTimelineItem)
-                .collect(Collectors.toList());
+//        List<TimelineItem> items = resultFeedIDs.stream()
+//                .map(this::getTimelineItem)
+//                .collect(Collectors.toList());
+        var items = getTimelineItems(resultFeedIDs);
         log.debug(items.toString());
         return items;
     }
@@ -159,51 +233,59 @@ public class Puller {
      */
     public List<TimelineItem> pullUserProfileFeed(@NonNull Long userID, Integer page, Integer pageSize) {
         // 最多缓存500条
-        String profileFeedKey = profileFeedKeyPrefix + userID;
+        String profileFeedKey = RedisKeyPrefixs.profileFeedKeyPrefix + userID;
         List<String> feedIDs;
         List<TimelineItem> timelineItems;
 
-        if (stringRedisTool.hasKey(profileFeedKey)) {
-            // 存在直接读取
-            feedIDs = new ArrayList<>(stringRedisTool.zsetGetByRange(profileFeedKey, 0, 499));
-            timelineItems = feedIDs.stream()
-                    .map(this::getTimelineItem)
-                    .collect(Collectors.toList());
-            log.debug(timelineItems.toString());
-        } else {
-            // 不存在，建立
-            List<WextDTO> wexts = wextService.getWextsOfUser(userID, 1, 500);
-            List<RepostDTO> reposts = repostService.getRepostsFromUser(userID, 1, 500);
-            timelineItems = mergeWextAndRepost(wexts, reposts, 100);
-
-            // 转化为对应格式存储到redis中
-            feedIDs = timelineItems.stream()
-                    .map(i -> {
-                        if (i.isRepost()) {
-                            return FeedTool.geneFeedID(i.getWext(), i.getRepostUser().getId(), i.getCreatedTime().getTime());
-                        } else {
-                            return FeedTool.geneFeedID(i.getWext());
-                        }
-                    }).collect(Collectors.toList());
-            feedIDs.forEach(feedID ->
-                    stringRedisTool.zsetAdd(profileFeedKey, feedID, - FeedTool.getTimestampFromFeedID(feedID).doubleValue()));   // 放入到redis中，score为负数
-        }
-        stringRedisTool.expire(profileFeedKey, pathFeedTTL);    // 更新缓存时间
-
         try {
-            return timelineItems.subList(
-                    (page-1) * pageSize,
-                    page * pageSize > timelineItems.size() ? timelineItems.size() : page * pageSize
-            );
+            if (stringRedisTool.hasKey(profileFeedKey)) {
+                // 存在直接读取
+                feedIDs = new ArrayList<>(stringRedisTool.zsetGetByRange(profileFeedKey, 0, 499));
+    //            timelineItems = feedIDs.stream()
+    //                    .map(this::getTimelineItem)
+    //                    .collect(Collectors.toList());
+                timelineItems = getTimelineItems(feedIDs.subList(
+                        (page - 1) * pageSize,
+                        Math.min(page * pageSize, feedIDs.size())
+                ));
+                log.debug(timelineItems.toString());
+            } else {
+                // 不存在，建立
+                List<WextDTO> wexts = wextService.getWextsOfUser(userID, 1, 500);
+                List<RepostDTO> reposts = repostService.getRepostsFromUser(userID, 1, 500);
+                timelineItems = mergeWextAndRepost(wexts, reposts, 100);
+                // 转化为对应格式存储到redis中
+                transAndAddToRedisFeed(profileFeedKey, timelineItems);
+                timelineItems = timelineItems.subList(
+                        (page - 1) * pageSize,
+                        Math.min(page * pageSize, timelineItems.size())
+                );
+            }
+            stringRedisTool.expire(profileFeedKey, pathFeedTTL);    // 更新缓存时间
+            return timelineItems;
         } catch (Exception e) {
             return new ArrayList<>();
         }
 
     }
 
+    private void transAndAddToRedisFeed(String profileFeedKey, List<TimelineItem> timelineItems) {
+        List<String> feedIDs;
+        feedIDs = timelineItems.stream()
+                .map(i -> {
+                    if (i.isRepost()) {
+                        return FeedTool.geneFeedID(i.getWext(), i.getRepostUser().getId(), i.getCreatedTime().getTime());
+                    } else {
+                        return FeedTool.geneFeedID(i.getWext());
+                    }
+                }).collect(Collectors.toList());
+        feedIDs.forEach(feedID ->
+                stringRedisTool.zsetAdd(profileFeedKey, feedID, -FeedTool.getTimestampFromFeedID(feedID).doubleValue()));   // 放入到redis中，score为负数
+    }
+
     private List<String> pullUserProfileFeedIDs(@NonNull Long userID) {
         // 最多缓存500条
-        String profileFeedKey = profileFeedKeyPrefix + userID;
+        String profileFeedKey = RedisKeyPrefixs.profileFeedKeyPrefix + userID;
         List<String> feedIDs;
 
         if (stringRedisTool.hasKey(profileFeedKey)) {
@@ -225,7 +307,7 @@ public class Puller {
                         }
                     }).collect(Collectors.toList());
             feedIDs.forEach(feedID ->
-                    stringRedisTool.zsetAdd(profileFeedKey, feedID, - FeedTool.getTimestampFromFeedID(feedID).doubleValue()));   // 放入到redis中，score为负数
+                    stringRedisTool.zsetAdd(profileFeedKey, feedID, -FeedTool.getTimestampFromFeedID(feedID).doubleValue()));   // 放入到redis中，score为负数
         }
         stringRedisTool.expire(profileFeedKey, pathFeedTTL);    // 更新缓存时间
         return feedIDs;
@@ -248,6 +330,66 @@ public class Puller {
             time.setTime(Long.parseLong(feedID.split(":")[3]));
             return new TimelineItem(wext, true, userInfoItem, repostUser, time);
         }
+    }
+
+    private List<TimelineItem> getTimelineItems(@NonNull List<String> feedIDs) {
+        /*
+         * 存储规则：W|R : wextID : (userID) : time
+         * 以冒号作分隔号，W为原创R为转发
+         * 只有转发时有userID参数，对应转发者的id
+         */
+        List<TimelineItem> timelineItems = new ArrayList<>(feedIDs.size());
+//        for (var feedID : feedIDs) {
+//            String wextID = FeedTool.getIDFromFeedID(feedID);
+//            wexts.add(pullWext(wextID));
+//        }
+        var wexts = new ArrayList<WextDTO>(feedIDs.size());
+        feedIDs.stream()
+                .map(FeedTool::getIDFromFeedID)
+                .forEach(wid -> wexts.add(pullWext(wid, true))); // 存入已有缓存数据到中继表
+        var flushWexts = flushWextIDs();  // 刷新存入未缓存数据
+        for (int i = 0; i < wexts.size(); i++) {
+            if (wexts.get(i) == null) {
+                var wextID = FeedTool.getIDFromFeedID(feedIDs.get(i));
+                wexts.set(i, flushWexts.getOrDefault(wextID, pullWext(wextID)));
+            }
+        }
+
+        var userIDs = wexts.stream()    // 提取user id打包获得user info
+                .map(WextDTO::getUserId)
+                .collect(Collectors.toSet());
+        feedIDs.stream()    // 提取转发用户
+                .filter(feedID -> feedID.charAt(0) == 'R')
+                .map(feedID -> Long.parseLong(feedID.split(":")[2]))
+                .forEach(userIDs::add);
+        var userInfos = new HashMap<Long, UserInfoItem>(userIDs.size());
+        userIDs.stream()
+                .map(id -> pullUserInfo(id, true))
+                .filter(Objects::nonNull)
+                .forEach(userInfoItem -> userInfos.put(userInfoItem.getId(), userInfoItem));    // 先存入已缓存的数据
+        userInfos.putAll(flushUserIDs());   // 刷新存入未缓存的数据
+
+        for (int i = 0; i < feedIDs.size(); i++) {
+            var feedID = feedIDs.get(i);
+            var wext = wexts.get(i);
+            var userInfoItem = userInfos.getOrDefault(
+                    wext.getUserId(), pullUserInfo(wext.getUserId())    // 考虑可能失败的情况时要重新获取
+            );
+            if (feedID.charAt(0) == 'W') {  // 原创
+                timelineItems.add(
+                        new TimelineItem(wext, false, userInfoItem, null, null)
+                );
+            } else {    // 转发
+                var ruid = Long.parseLong(feedID.split(":")[2]);
+                UserInfoItem repostUser = userInfos.getOrDefault(ruid, pullUserInfo(ruid));
+                Date time = new Date();
+                time.setTime(Long.parseLong(feedID.split(":")[3]));
+                timelineItems.add(
+                        new TimelineItem(wext, true, userInfoItem, repostUser, time)
+                );
+            }
+        }
+        return timelineItems;
     }
 
     private List<TimelineItem> mergeWextAndRepost(@NonNull List<WextDTO> wexts, @NonNull List<RepostDTO> reposts, int maxSize) {
@@ -290,14 +432,12 @@ public class Puller {
 
     /**
      * 拉取某人的timeline feed
-     * @param userID
-     * @return
      */
     public List<TimelineItem> pullTimelineOf(@NonNull Long userID,
                                              Long page, Integer pageSize, String lastWextID) {
         // timeline 最大500条
         List<String> feedIDs = new ArrayList<>();
-        String feedKey = userTimelineFeedKeyPrefix + userID;
+        String feedKey = RedisKeyPrefixs.userTimelineFeedKeyPrefix + userID;
 
         if (!stringRedisTool.hasKey(feedKey)) {
             // 初始化的情况
@@ -313,7 +453,7 @@ public class Puller {
 
             // 保存timeline到redis
             feedIDs.forEach(feedID ->
-                    stringRedisTool.zsetAdd(feedKey, feedID, - FeedTool.getTimestampFromFeedID(feedID).doubleValue()));  // 放入到redis中，score为负数
+                    stringRedisTool.zsetAdd(feedKey, feedID, -FeedTool.getTimestampFromFeedID(feedID).doubleValue()));  // 放入到redis中，score为负数
             stringRedisTool.expire(feedKey, timelineFeedTTl);
 
         }
@@ -330,28 +470,24 @@ public class Puller {
             feedIDs = new ArrayList<>(stringRedisTool.zsetGetByRange(feedKey, start, end));
         }
 
-        return feedIDs.stream() // 将id转换为timelineItem
-                .map(this::getTimelineItem)
-                .collect(Collectors.toList());
+//        return feedIDs.stream() // 将id转换为timelineItem
+////                .map(this::getTimelineItem)
+////                .collect(Collectors.toList());
+        return getTimelineItems(feedIDs);
     }
 
     /**
      * 归并列表中的用户的feed流
+     *
      * @param userIDs 关注用户的id
      * @return 合并后的feedIDs
      */
     private List<String> mergeUserFeed(@NonNull List<Long> userIDs) {
-//        List<String> feedIDs = new ArrayList<>();
-//        for (Long userID : userIDs) {
-//            List<String> userFeedIDs = stringRedisTool.listGet(profileFeedKeyPrefix + userID, 0, 499);   // 当前用户的个人feed
-//            feedIDs = mergeFeedIDs(feedIDs, userFeedIDs, 500);  // reduce逻辑
-//        }
-        List<String> feedIDs = userIDs.stream()
+        return userIDs.stream()
                 .map(this::pullUserProfileFeedIDs)
                 .reduce((userFeedIDs_1, userFeedIDs_2) ->
                         new ArrayList<>(mergeFeedIDs(userFeedIDs_1, userFeedIDs_2, 500)))
                 .orElse(new ArrayList<>());
-        return feedIDs;
     }
 
     private List<String> mergeFeedIDs(@NonNull List<String> feed_1, @NonNull List<String> feed_2, int maxSize) {
@@ -405,5 +541,6 @@ public class Puller {
                 .createdTime(repost.getCreatedTime())
                 .build();
     }
+
 
 }

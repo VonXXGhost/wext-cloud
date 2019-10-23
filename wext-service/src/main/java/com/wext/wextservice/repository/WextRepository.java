@@ -8,14 +8,15 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
+import java.util.Collection;
 import java.util.Date;
-import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public interface WextRepository extends JpaRepository<Wext, String> {
     Optional<Wext> findById(String id);
 
-    List<Wext> findAllByIdIn(List<String> ids);
+    Set<Wext> findAllByIdIn(Collection<String> ids);
 
     Page<Wext> findAllByUserIdOrderByCreatedTimeDesc(Long userId, Pageable pageable);
 

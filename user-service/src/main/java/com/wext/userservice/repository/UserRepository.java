@@ -16,5 +16,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findById(Long id);
     Optional<User> findByScreenName(String screenName);
 
-    List<User> findByIdIn(Collection collection);
+    List<User> findByIdIn(Collection<Long> collection);
 }

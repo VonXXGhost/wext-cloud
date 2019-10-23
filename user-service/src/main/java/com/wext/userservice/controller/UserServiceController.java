@@ -1,16 +1,18 @@
 package com.wext.userservice.controller;
 
 import com.wext.common.domain.UserDTO;
+import com.wext.common.domain.UserInfoItem;
 import com.wext.common.utils.CommonTool;
 import com.wext.userservice.domain.User;
-import com.wext.common.domain.UserInfoItem;
 import com.wext.userservice.service.UserService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 public class UserServiceController {
@@ -56,5 +58,10 @@ public class UserServiceController {
                               @RequestParam String email, @RequestParam String nickname) {
         var user = userService.createUser(screenName, password, email, nickname);
         return CommonTool.transBean(user, UserDTO.class);
+    }
+
+    @PostMapping("/getUserInfosByIds")
+    public Map<Long, UserInfoItem> getUserInfosByIds(@RequestBody Collection<Long> ids) {
+        return userService.getUsersInfo(ids);
     }
 }

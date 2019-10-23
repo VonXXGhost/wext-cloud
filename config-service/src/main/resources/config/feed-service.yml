@@ -18,7 +18,7 @@ eureka:
 
 logging:
   level:
-    root: debug
+    root: info
 
 feign:
   client:
@@ -27,3 +27,10 @@ feign:
         connectTimeout: 8000
         readTimeout: 8000
         loggerLevel: basic
+
+wext:
+  keyTTL:
+    pathFeed: 300 # 5 min
+    wextItem: 300 # 5 min
+    userEntity: 300 # 5 min
+    timelineFeed: 300 # 5 min

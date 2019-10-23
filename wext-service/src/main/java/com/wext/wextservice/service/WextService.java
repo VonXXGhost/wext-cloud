@@ -11,7 +11,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @Slf4j
@@ -61,11 +64,13 @@ public class WextService {
         return wext;
     }
 
-    public List<Wext> getWexts(@NonNull List<String> wextIDs) {
+    public Map<String, Wext> getWexts(@NonNull Collection<String> wextIDs) {
         log.debug(wextIDs.toString());
-        List<Wext> wexts = wextRepository.findAllByIdIn(wextIDs);
+        var wexts = wextRepository.findAllByIdIn(wextIDs);
+        Map<String, Wext> resultMap = new HashMap<>(wexts.size());
+        wexts.forEach(wext -> resultMap.put(wext.getId(), wext));
         log.debug(wexts.toString());
-        return wexts;
+        return resultMap;
     }
 
     public List<Wext> getWextsOfPath(@NonNull String fullPath,
