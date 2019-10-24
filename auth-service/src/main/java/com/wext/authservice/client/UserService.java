@@ -13,8 +13,14 @@ public interface UserService {
 
     @PostMapping("/createUser")
     UserDTO createUser(@RequestParam String screenName, @RequestBody String password,
-                              @RequestParam String email, @RequestParam String nickname);
+                       @RequestParam String email, @RequestParam String nickname);
 
     @PostMapping("/userInfo")
     UserInfoItem getUserInfo(@RequestBody UserDTO user);
+
+    @GetMapping("/userInfo/{id}")
+    UserInfoItem getUserInfo(@PathVariable Long id);
+
+    @PostMapping("/updateUserPassword")
+    UserDTO updateUserPassword(@RequestParam Long id, @RequestBody String password);
 }
