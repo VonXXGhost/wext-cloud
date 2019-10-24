@@ -43,7 +43,7 @@ public class JwtTokenProviderTest {
         var tokenBeforeChangePW = jwtTokenProvider._createToken(
                 "40", Collections.singletonList("USER"),
                 new Date(2019, Calendar.OCTOBER, 24, 0, 0, 0)
-                );
+        );
         var tokenAfterChangePW = jwtTokenProvider._createToken(
                 "40", Collections.singletonList("USER"),
                 new Date(2019, Calendar.OCTOBER, 24, 0, 2, 0)
