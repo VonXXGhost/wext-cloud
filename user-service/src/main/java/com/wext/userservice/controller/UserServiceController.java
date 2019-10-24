@@ -64,4 +64,11 @@ public class UserServiceController {
     public Map<Long, UserInfoItem> getUserInfosByIds(@RequestBody Collection<Long> ids) {
         return userService.getUsersInfo(ids);
     }
+
+    @PostMapping("/updateUserPassword")
+    public UserDTO updateUserPassword(@RequestParam Long id, @RequestBody String password) {
+        return CommonTool.transBean(
+                userService.updateUserPassword(id, password), UserDTO.class
+        );
+    }
 }

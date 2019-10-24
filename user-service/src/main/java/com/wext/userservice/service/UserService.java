@@ -238,4 +238,10 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    public User updateUserPassword(@NonNull Long id, @NonNull String password) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new NonExistentException("Can't find by id " + id));
+        user.setPassword(passwordEncoder.encode(password));
+        return userRepository.saveAndFlush(user);
+    }
 }
