@@ -2,6 +2,8 @@ package com.wext.resourcesservice.controller;
 
 import com.wext.common.domain.BaseResponse;
 import com.wext.common.domain.exception.InvalidOperationException;
+import com.wext.resourcesservice.client.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -10,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.IOException;
 import java.util.Date;
@@ -35,10 +36,12 @@ public class UploadController {
 
     private static final String USERID_HEADER = "X-data-userID";
 
+    @Autowired
+    private UserService userService;
+
     @PostMapping("/image")
     public ResponseEntity uploadPic(MultipartFile file,
-                                    @RequestHeader(USERID_HEADER) String userID,
-                                    HttpServletRequest request) throws IOException {
+                                    @RequestHeader(USERID_HEADER) String userID) throws IOException {
         if (file == null || file.isEmpty()) {
             throw new InvalidOperationException("Not found the file");
         } else if (file.getSize() > imgMaxSize) {    // 最大10MB
@@ -50,13 +53,39 @@ public class UploadController {
             String filename = userID + new Date().getTime() + '.' + suffix;  // 用户名+时间戳+源后缀名
             File f = new File(absoluteImgPath, filename);
             file.transferTo(f);
-            Map resp = new TreeMap();
+            Map<String, String> resp = new TreeMap<>();
             resp.put("path", imgPath + filename);
             return ResponseEntity.ok(
                     BaseResponse.successResponse(resp)
             );
         } else {
             throw new InvalidOperationException("Only allow upload jpg, png or gif.");
+        }
+    }
+
+    @PostMapping("/profile_icon")
+    public ResponseEntity uploadUserIcon(MultipartFile file,
+                                         @RequestHeader(USERID_HEADER) String userID) throws IOException {
+        if (file == null || file.isEmpty()) {
+            throw new InvalidOperationException("Not found the file");
+        } else if (file.getSize() > 1048576) {    // 最大1MB
+            throw new InvalidOperationException("File size is too big.");
+        }
+        String suffix = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf('.') + 1);
+        Set<String> allowSuffix = Stream.of("png", "jpg").collect(Collectors.toSet());
+        if (allowSuffix.contains(suffix)) {
+            String filename = userID + new Date().getTime() + '.' + suffix;  // 用户名+时间戳+源后缀名
+            File f = new File(absoluteImgPath, filename);
+            file.transferTo(f);
+            Map<String, String> attr = new TreeMap<>();
+            attr.put("icon_filename", filename);
+            // 更新数据库信息
+            userService.updateUserAttr(Long.parseLong(userID), attr);
+            return ResponseEntity.ok(
+                    BaseResponse.successResponse(attr)
+            );
+        } else {
+            throw new InvalidOperationException("Only allow upload jpg, png.");
         }
     }
 

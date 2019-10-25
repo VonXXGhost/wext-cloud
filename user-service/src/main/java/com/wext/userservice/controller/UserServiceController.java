@@ -3,6 +3,7 @@ package com.wext.userservice.controller;
 import com.wext.common.domain.UserDTO;
 import com.wext.common.domain.UserInfoItem;
 import com.wext.common.utils.CommonTool;
+import com.wext.userservice.client.Pusher;
 import com.wext.userservice.domain.User;
 import com.wext.userservice.service.UserService;
 import org.springframework.beans.BeanUtils;
@@ -19,6 +20,9 @@ public class UserServiceController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private Pusher pusher;
 
     @GetMapping("/getUserAutoChoose/{userArg}")
     public UserDTO getUserAutoChoose(@PathVariable String userArg) {
@@ -63,6 +67,20 @@ public class UserServiceController {
     @PostMapping("/getUserInfosByIds")
     public Map<Long, UserInfoItem> getUserInfosByIds(@RequestBody Collection<Long> ids) {
         return userService.getUsersInfo(ids);
+    }
+
+    @PostMapping("/updateUserAttr")
+    public UserDTO updateUserAttr(@RequestParam Long id, @RequestBody Map<String, String> newAttrs) {
+        var user = userService.updateUserAttr(id, newAttrs);
+        var userDTO = CommonTool.transBean(
+                user, UserDTO.class
+        );
+
+        new Thread(
+                () -> pusher.updateUserInfoItem(userService.getUserInfo(user))
+        ).start();
+
+        return userDTO;
     }
 
     @PostMapping("/updateUserPassword")

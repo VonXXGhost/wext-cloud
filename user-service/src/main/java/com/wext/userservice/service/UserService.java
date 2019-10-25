@@ -214,7 +214,7 @@ public class UserService {
     }
 
     public User updateUserAttr(@NonNull Long id, @NonNull Map<String, String> newAttrs) {
-        // 更新密码、头像外的用户信息
+        // 更新密码外的用户信息
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new NonExistentException("Can't find by id " + id));
 
@@ -222,16 +222,22 @@ public class UserService {
             String key = attr.getKey();
             String value = attr.getValue();
 
-            if (key.equals("nickname")) {
-                if (value.length() > 32) {
-                    throw new InvalidOperationException("Nickname is too Long");
-                }
-                user.setNickname(value);
-            } else if (key.equals("profile")) {
-                if (value.length() > 255) {
-                    throw new InvalidOperationException("Profile is too Long");
-                }
-                user.setProfile(value);
+            switch (key) {
+                case "nickname":
+                    if (value.length() > 32) {
+                        throw new InvalidOperationException("Nickname is too Long");
+                    }
+                    user.setNickname(value);
+                    break;
+                case "profile":
+                    if (value.length() > 255) {
+                        throw new InvalidOperationException("Profile is too Long");
+                    }
+                    user.setProfile(value);
+                    break;
+                case "icon_filename":
+                    user.setIconFilename(value);
+                    break;
             }
         }
 
