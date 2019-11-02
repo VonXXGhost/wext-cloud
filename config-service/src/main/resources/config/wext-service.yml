@@ -6,12 +6,16 @@ logging:
     root: info
 
 spring:
+  redis:
+    host: localhost
+    port: 6379
+    password:
   datasource:
     url: jdbc:mysql://localhost:3306/wext_db
     username: root
     password:
   jpa:
-    show-sql: false
+    show-sql: true
   main:
     allow-bean-definition-overriding: true
 
@@ -38,3 +42,9 @@ feign:
         connectTimeout: 8000
         readTimeout: 8000
         loggerLevel: basic
+
+wext:
+  keyTTL:
+    hot-path-cache-hours: 12
+  path:
+    hot-path-validDataHours: 4320 # 24 * 30 * 6

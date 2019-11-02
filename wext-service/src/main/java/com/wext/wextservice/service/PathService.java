@@ -3,6 +3,8 @@ package com.wext.wextservice.service;
 import com.wext.common.domain.exception.InvalidOperationException;
 import com.wext.common.domain.exception.NonExistentException;
 import com.wext.wextservice.domain.Path;
+import com.wext.wextservice.domain.PathCount;
+import com.wext.wextservice.repository.PathCountRepository;
 import com.wext.wextservice.repository.PathRepository;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -19,10 +21,12 @@ import java.util.regex.Pattern;
 public class PathService {
 
     private PathRepository pathRepository;
+    private PathCountRepository pathCountRepository;
 
     @Autowired
-    public PathService(PathRepository pathRepository) {
+    public PathService(PathRepository pathRepository, PathCountRepository pathCountRepository) {
         this.pathRepository = pathRepository;
+        this.pathCountRepository = pathCountRepository;
     }
 
     public Path getPath(@NonNull Long id) {
@@ -88,7 +92,18 @@ public class PathService {
 
     }
 
-    /* TODO
-    *  节点人气排序
-    * */
+
+    /**
+     * @param fullPath 全路径
+     * @param hours 时间指定，选取多少小时之前的数据统计
+     */
+    public List<PathCount> getHotChildPaths(@NonNull String fullPath, @NonNull Integer hours,
+                                            Integer page, Integer pageSize) {
+        if (fullPath.equals("/")) {
+            fullPath = "";
+        }
+        var res = pathCountRepository.getHotChildPath(fullPath, hours, PageRequest.of(page - 1, pageSize));
+        log.debug(res.toString());
+        return res.getContent();
+    }
 }
