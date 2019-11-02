@@ -1,7 +1,7 @@
 package com.wext.gatewayservice.filter;
 
 
-import com.wext.common.domain.exception.AuthorityLimitException;
+import com.wext.common.domain.exception.UnauthorizedException;
 import com.wext.gatewayservice.client.AuthService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,13 +76,13 @@ public class AuthFilter extends AbstractGatewayFilterFactory<AuthFilter.Config> 
                             if (finalAllowEmpty) {
                                 return new PassException(); // 允许不带token的请求通过
                             } else {
-                                return new AuthorityLimitException("Need login.");
+                                return new UnauthorizedException("Need login.");
                             }
                         })
                         .get(0);
                 var userID = Optional
                         .ofNullable(authService.getUSerIDFromToken(tokenHead))
-                        .orElseThrow(() -> new AuthorityLimitException("Bad token."));
+                        .orElseThrow(() -> new UnauthorizedException("Bad token."));
 
                 builder.header(USERID_HEADER, userID);
                 return chain.filter(exchange.mutate().request(builder.build()).build());

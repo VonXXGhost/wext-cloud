@@ -1,10 +1,7 @@
 package com.wext.gatewayservice.handler;
 
 import com.wext.common.domain.BaseResponse;
-import com.wext.common.domain.exception.AuthorityLimitException;
-import com.wext.common.domain.exception.InvalidOperationException;
-import com.wext.common.domain.exception.NonExistentException;
-import com.wext.common.domain.exception.UserTargetException;
+import com.wext.common.domain.exception.*;
 import org.springframework.boot.autoconfigure.web.ResourceProperties;
 import org.springframework.boot.autoconfigure.web.reactive.error.AbstractErrorWebExceptionHandler;
 import org.springframework.boot.web.reactive.error.ErrorAttributes;
@@ -32,6 +29,7 @@ public class GlobalExceptionHandler extends AbstractErrorWebExceptionHandler {
         exceptionCodes.put(NonExistentException.class, 404);
         exceptionCodes.put(InvalidOperationException.class, 400);
         exceptionCodes.put(UserTargetException.class, 404);
+        exceptionCodes.put(UnauthorizedException.class, 401);
     }
 
     public GlobalExceptionHandler(ErrorAttributes errorAttributes,

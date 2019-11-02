@@ -8,6 +8,7 @@ import com.wext.common.domain.BaseResponse;
 import com.wext.common.domain.UserDTO;
 import com.wext.common.domain.request.AuthenticationRequest;
 import com.wext.common.domain.request.UserInfoRequest;
+import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,6 +23,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 @RestController
 @RequestMapping("/auth")
@@ -58,7 +60,8 @@ public class AuthController {
 
             // 构造返回信息
             Map<Object, Object> model = new HashMap<>();
-            model.put("login name", data.getUsername());
+            var userInfo = userService.getUserInfo(user);
+            model.put("user", userInfo);
             model.put("token", token);
 
             log.info("UserID " + id + " get the token: " + token);
@@ -67,9 +70,18 @@ public class AuthController {
             );
         } catch (AuthenticationException e) {
             log.info("User " + data.getUsername() + " login failed.");
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
                     BaseResponse.failResponse("Invalid username/password supplied")
             );
+        } catch (FeignException e) {
+            if (e.status() == 404 && e.getMessage().contains("getUserAutoChoose")) {
+                log.info("User " + data.getUsername() + " login failed.");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                        BaseResponse.failResponse("Invalid username/password supplied")
+                );
+            } else {
+                throw e;
+            }
         }
     }
 
@@ -77,6 +89,10 @@ public class AuthController {
     public ResponseEntity signup(@RequestBody UserInfoRequest data) {
 
         try {
+            if (!checkUserInfoRequest(data)) {
+                return ResponseEntity.badRequest()
+                        .body(BaseResponse.failResponse("Parameter format are wrong."));
+            }
             UserDTO user = userService.createUser(
                     data.getScreenName(),
                     data.getPassword(),
@@ -123,8 +139,14 @@ public class AuthController {
                 BaseResponse.successResponse(model)
         );
     }
-//    @RequestMapping(value = "/**",method = RequestMethod.OPTIONS)
-//    public ResponseEntity handleOptions(){
-//        return ResponseEntity.noContent().build();
-//    }
+
+    private boolean checkUserInfoRequest(UserInfoRequest data) {
+        return Pattern.matches("^[a-zA-Z]\\w{3,11}$", data.getScreenName()) &&
+//                Pattern.matches("[a-zA-Z0-9`~!@#$%^&*()_+\\-={}|\\[\\]\\\\;':\"<>?,./]{6,18}", data.getPassword()) &&
+                Pattern.matches("^[!-~]{6,18}$", data.getPassword()) && // 所有键盘的可见字符
+                Pattern.matches("^\\S{1,16}$", data.getNickname()) &&
+                Pattern.matches("^(.+)@(.+)$", data.getEmail());
+
+    }
+
 }

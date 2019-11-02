@@ -235,7 +235,7 @@ public class UserService {
                     }
                     user.setProfile(value);
                     break;
-                case "icon_filename":
+                case "iconPath":
                     user.setIconFilename(value);
                     break;
             }
