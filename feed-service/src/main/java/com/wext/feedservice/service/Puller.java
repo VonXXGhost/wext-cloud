@@ -104,6 +104,7 @@ public class Puller {
         var wexts = wextService.getWexts(wids);
         wexts.forEach((id, wext) -> {   // 存入到redis中
             String wextKey = RedisKeyPrefixs.wextKeyPrefix + id;
+            wext.setPicList(WextTool.stringToPicsList(wext.getPics())); // string类型图片存储属性会被忽略，在存入redis前就要转换
             wextRedisTool.set(wextKey, wext, wextTTL);
         });
         return wexts;

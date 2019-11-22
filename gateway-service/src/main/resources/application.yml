@@ -101,3 +101,5 @@ spring:
           uri: lb://resources-service
           predicates:
             - Path=/images/**
+  application:
+    name: gateway-service

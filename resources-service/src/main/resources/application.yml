@@ -3,7 +3,7 @@ server:
 
 logging:
   level:
-    root: debug
+    root: info
 
 eureka:
   instance:
@@ -20,3 +20,7 @@ upload:
   img-absolute-path: D://Study/Java/wextcould/resources-service/src/main/resources/static/imgs/
   img-path: /images/
   img-max-size: 10485760  # 10Mb
+
+spring:
+  application:
+    name: resources-service
