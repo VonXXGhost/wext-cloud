@@ -54,7 +54,8 @@ public class DirectMessageController {
                                          @RequestHeader(USERID_HEADER) String userID) {
         DirectMessage message = dmService.getDM(id);
 
-        if (message.getUserIdFrom().toString().equals(userID)) {    // 只有发出者可以删除私信
+        if (message.getUserIdFrom().toString().equals(userID) ||
+                message.getUserIdTo().toString().equals(userID)) {    // 只有发出或接收者可以删除私信
 
             dmService.deleteDM(id);
             return ResponseEntity.ok(
@@ -124,10 +125,5 @@ public class DirectMessageController {
                 BaseResponse.successResponse(null)
         );
     }
-
-//    @RequestMapping(value = "/**",method = RequestMethod.OPTIONS)
-//    public ResponseEntity handleOptions(){
-//        return ResponseEntity.noContent().build();
-//    }
 
 }

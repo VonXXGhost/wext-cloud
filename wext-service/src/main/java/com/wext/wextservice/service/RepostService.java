@@ -12,7 +12,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 @Slf4j
@@ -65,8 +66,8 @@ public class RepostService {
         log.info("Repost deleted: " + userID + " in " + wextID);
     }
 
-    public List<Repost> getRepostsFromUser(@NonNull Long userID,
-                                           Integer page, Integer pageSize) {
+    public Map<String, Object> getRepostsFromUser(@NonNull Long userID,
+                                                  Integer page, Integer pageSize) {
         if (page == null || page < 1) {
             page = 1;
         }
@@ -75,12 +76,15 @@ public class RepostService {
         }
         Pageable pageable = PageRequest.of(page - 1, pageSize);
 
-        List<Repost> reposts = repostRepository.findAllByUserIdOrderByCreatedTimeDesc(userID, pageable).getContent();
-        log.debug(reposts.toString());
-        return reposts;
+        var reposts = repostRepository.findAllByUserIdOrderByCreatedTimeDesc(userID, pageable);
+        var res = new HashMap<String, Object>();
+        res.put("total_pages", reposts.getTotalPages());
+        res.put("reposts", reposts.getContent());
+        log.debug(res.toString());
+        return res;
     }
 
-    public List<Repost> getRepostsOfWext(@NonNull String wextID,
+    public Map<String, Object> getRepostsOfWext(@NonNull String wextID,
                                            Integer page, Integer pageSize) {
         if (page == null || page < 1) {
             page = 1;
@@ -90,9 +94,12 @@ public class RepostService {
         }
         Pageable pageable = PageRequest.of(page - 1, pageSize);
 
-        List<Repost> reposts = repostRepository.findAllByWextIdOrderByCreatedTimeDesc(wextID, pageable).getContent();
-        log.debug(reposts.toString());
-        return reposts;
+        var reposts = repostRepository.findAllByWextIdOrderByCreatedTimeDesc(wextID, pageable);
+        var res = new HashMap<String, Object>();
+        res.put("total_pages", reposts.getTotalPages());
+        res.put("reposts", reposts.getContent());
+        log.debug(res.toString());
+        return res;
     }
 
     public int countRepostOfWext(@NonNull String wextID) {

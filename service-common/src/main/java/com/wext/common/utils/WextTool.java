@@ -38,7 +38,7 @@ public class WextTool {
         if (s == null || s.equals("")) {
             return new ArrayList<>();
         }
-        return new ArrayList<>(Arrays.asList(s.split("\n")));
+        return Arrays.asList(s.split("\n"));
     }
 
     public static List<String> splitPath(@NonNull String fullPath) {

@@ -64,6 +64,16 @@ public class WextController {
         );
     }
 
+    @GetMapping("/{wextID}/reposts")
+    public ResponseEntity getWextReposts(@PathVariable String wextID,
+                                          @RequestParam(required = false, defaultValue = "1") Integer page,
+                                          @RequestParam(required = false, defaultValue = "30") Integer pageSize) {
+        Map<String, Object> reposts = repostService.getRepostsOfWext(wextID, page, pageSize);
+        return ResponseEntity.ok(
+                BaseResponse.successResponse(reposts)
+        );
+    }
+
     @GetMapping("/{wextID}/comments")
     public ResponseEntity getWextComments(@PathVariable String wextID,
                                           @RequestParam(required = false, defaultValue = "1") Integer page,
@@ -245,11 +255,6 @@ public class WextController {
         return ResponseEntity.ok(
                 BaseResponse.successResponse(repostService.hasRepost(userID, wextID))
         );
-    }
-
-    @RequestMapping(value = "/**",method = RequestMethod.OPTIONS)
-    public ResponseEntity handleOptions(){
-        return ResponseEntity.noContent().build();
     }
 
 }

@@ -17,16 +17,7 @@ public class RepostServiceController {
 
     @GetMapping("/getRepostsFromUser/{userID}")
     public List<RepostDTO> getRepostsFromUser(@PathVariable Long userID, @RequestParam Integer page, @RequestParam Integer pageSize) {
-        var reposts = repostService.getRepostsFromUser(userID, page, pageSize);
-        return transToDTO(reposts);
-    }
-
-    private List<RepostDTO> transToDTO(List<Repost> reposts) {
-//        List<RepostDTO> dtos = new ArrayList<>(reposts.size());
-//        for (int i = 0; i < reposts.size(); i++) {
-//            var dto = dtos.set(i, new RepostDTO());
-//            BeanUtils.copyProperties(reposts.get(i), dto);
-//        }
+        var reposts = (List<Repost>) repostService.getRepostsFromUser(userID, page, pageSize).get("reposts");
         return CommonTool.transBean(reposts, RepostDTO.class);
     }
 
