@@ -20,4 +20,13 @@ public class AuthServiceController {
         }
         return null;
     }
+
+    @GetMapping("/getManagerIDFromToken")
+    public String getManagerIDFromToken(@RequestParam String bearerToken) {
+        var token = jwtTokenProvider.resolveToken(bearerToken);
+        if (token != null && jwtTokenProvider.validateToken(token)) {
+            return jwtTokenProvider.getUsername(token);
+        }
+        return null;
+    }
 }

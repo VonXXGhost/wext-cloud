@@ -4,6 +4,7 @@ package com.wext.gatewayservice.filter;
 import com.wext.common.domain.exception.UnauthorizedException;
 import com.wext.gatewayservice.client.AuthService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
@@ -11,6 +12,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
@@ -24,7 +26,7 @@ import java.util.regex.Pattern;
 public class AuthFilter extends AbstractGatewayFilterFactory<AuthFilter.Config> {
 
     @Autowired
-    private AuthService authService;
+    private ObjectProvider<AuthService> authService;
 
     private static final String USERID_HEADER = "X-data-userID";
 
@@ -80,8 +82,9 @@ public class AuthFilter extends AbstractGatewayFilterFactory<AuthFilter.Config> 
                             }
                         })
                         .get(0);
+
                 var userID = Optional
-                        .ofNullable(authService.getUSerIDFromToken(tokenHead))
+                        .ofNullable(Objects.requireNonNull(authService.getIfAvailable()).getUSerIDFromToken(tokenHead))
                         .orElseThrow(() -> new UnauthorizedException("Bad token."));
 
                 builder.header(USERID_HEADER, userID);
@@ -110,7 +113,7 @@ public class AuthFilter extends AbstractGatewayFilterFactory<AuthFilter.Config> 
         private List<String> excludePaths;      // 完全跳过
         private List<String> allowEmptyToken; // 允许不带有token，带有时仍然处理token信息
 
-        public List<String> getExcludePaths() {
+        List<String> getExcludePaths() {
             return excludePaths;
         }
 
@@ -118,7 +121,7 @@ public class AuthFilter extends AbstractGatewayFilterFactory<AuthFilter.Config> 
             this.excludePaths = excludePaths;
         }
 
-        public List<String> getAllowEmptyToken() {
+        List<String> getAllowEmptyToken() {
             return allowEmptyToken;
         }
 

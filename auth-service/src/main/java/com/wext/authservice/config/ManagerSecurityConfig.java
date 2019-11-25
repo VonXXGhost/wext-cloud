@@ -1,7 +1,7 @@
 package com.wext.authservice.config;
 
 import com.wext.authservice.jwt.JwtTokenProvider;
-import com.wext.authservice.service.CustomUserDetailsService;
+import com.wext.authservice.service.ManagerDetailsService;
 import com.wext.common.bean.CustomPasswordEncoder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -14,14 +14,14 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 
 @Configuration
-@Order(2)
-public class SecurityConfig extends WebSecurityConfigurerAdapter {
+@Order(1)
+public class ManagerSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
     JwtTokenProvider jwtTokenProvider;
 
     @Autowired
-    CustomUserDetailsService customUserDetailsService;
+    ManagerDetailsService managerDetailsService;
 
     @Autowired
     CustomPasswordEncoder customPasswordEncoder;
@@ -29,9 +29,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
-                .antMatcher("/auth/login")
-                .antMatcher("/auth/signup")
-                .antMatcher("/auth/password")
+                .antMatcher("/auth/manager/**")
                 .httpBasic().disable()
                 .csrf().disable()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
@@ -39,14 +37,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(customUserDetailsService)
+        auth.userDetailsService(managerDetailsService)
                 .passwordEncoder(new CustomPasswordEncoder());
     }
 
-    @Bean(name = "userAuthenticationManager")
+    @Bean(name = "managerAuthenticationManager")
     @Override
     public AuthenticationManager authenticationManagerBean() throws Exception {
         return super.authenticationManagerBean();
     }
-
 }

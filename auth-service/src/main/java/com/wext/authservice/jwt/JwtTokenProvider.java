@@ -2,6 +2,7 @@ package com.wext.authservice.jwt;
 
 import com.wext.authservice.config.RedisKeyPrefixs;
 import com.wext.authservice.service.CustomUserDetailsService;
+import com.wext.authservice.service.ManagerDetailsService;
 import com.wext.common.bean.RedisTool;
 import io.jsonwebtoken.*;
 import lombok.extern.slf4j.Slf4j;
@@ -27,14 +28,14 @@ public class JwtTokenProvider {
     @Value("${security.jwt.token.expire-length}")
     private long validityInMilliseconds;
 
+    @Autowired
     private CustomUserDetailsService customUserDetailsService;
+
+    @Autowired
     private RedisTool<Date> timeRedisTool;
 
     @Autowired
-    public JwtTokenProvider(CustomUserDetailsService customUserDetailsService, RedisTool<Date> timeRedisTool) {
-        this.customUserDetailsService = customUserDetailsService;
-        this.timeRedisTool = timeRedisTool;
-    }
+    private ManagerDetailsService managerDetailsService;
 
     @PostConstruct
     protected void init() {

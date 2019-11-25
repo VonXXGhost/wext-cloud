@@ -10,4 +10,6 @@ public interface AuthService {
     @GetMapping("/getUserIDFromToken")
     String getUSerIDFromToken(@RequestParam String bearerToken);
 
+    @GetMapping("/getManagerIDFromToken")
+    String getManagerIDFromToken(@RequestParam String bearerToken);
 }

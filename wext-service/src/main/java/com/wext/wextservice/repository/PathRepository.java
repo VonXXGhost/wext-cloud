@@ -12,7 +12,6 @@ public interface PathRepository extends JpaRepository<Path, Long> {
 
     Optional<Path> findByFullPath(String fullPath);
 
-    Optional<Path> findById(Long id);
-
     Page<Path> findAllByFullPathIsStartingWith(String prePath, Pageable pageable);
+
 }

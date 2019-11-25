@@ -5,7 +5,7 @@ import com.wext.common.domain.UserInfoItem;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
-@FeignClient(name = "user-service")
+@FeignClient(name = "user-service", contextId = "userService")
 public interface UserService {
 
     @GetMapping("/getUserAutoChoose/{userArg}")

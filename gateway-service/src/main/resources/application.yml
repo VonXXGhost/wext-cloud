@@ -101,5 +101,19 @@ spring:
           uri: lb://resources-service
           predicates:
             - Path=/images/**
+        - id: PR_route
+          uri: lb://wext-service
+          order: 2
+          predicates:
+            - Path=/path_request/**
+          filters:
+            - name: AuthFilter
+        - id: PR_Manage_route
+          uri: lb://wext-service
+          order: 1
+          predicates:
+            - Path=/path_request/manage/**
+          filters:
+            - name: ManagerAuthFilter
   application:
     name: gateway-service

@@ -21,7 +21,7 @@ public class NewWextRequest implements Serializable {
     @Size(max = 3000, message = "Comment too long")
     private String content;
 
-    @Size(max = 4, message = "Only up to 4 pictures are allowed.")
+    @Size(max = 1, message = "Only up to 1 picture are allowed.")
     private List<String> picURLs;
 
     @NotNull(message = "Path can not null.")

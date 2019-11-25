@@ -16,7 +16,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/message")
@@ -114,12 +113,9 @@ public class DirectMessageController {
 
     @PostMapping("/read")
     public ResponseEntity readDM(@RequestHeader(USERID_HEADER) String userID,
-                                 @RequestBody ListRequest request) {
-        List<Long> list = request.getList().stream()
-                .map(Long::parseLong)
-                .collect(Collectors.toList());
+                                 @RequestBody ListRequest<Long> request) {
 
-        dmService.readDM(list, Long.parseLong(userID));
+        dmService.readDM(request.getList(), Long.parseLong(userID));
 
         return ResponseEntity.ok(
                 BaseResponse.successResponse(null)

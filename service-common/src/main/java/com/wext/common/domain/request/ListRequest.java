@@ -12,9 +12,9 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ListRequest implements Serializable {
+public class ListRequest<T> implements Serializable {
 
     private static final long serialVersionUID = -6986746375915710855L;
 
-    private List<String> list;
+    private List<T> list;
 }

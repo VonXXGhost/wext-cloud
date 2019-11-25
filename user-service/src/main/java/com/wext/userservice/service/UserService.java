@@ -37,14 +37,13 @@ public class UserService {
         this.userNodeRepository = userNodeRepository;
     }
 
-    @Transactional
     public UserDetails getUserDetail(@NonNull String userArg) {
 
         User user = this.getUserAutoChoose(userArg);
-        List<String> roleList = Arrays.asList("USER");
+        List<String> roleList = Collections.singletonList("USER");
 
         List<GrantedAuthority> authorities = roleList.stream()
-                .map(role -> new SimpleGrantedAuthority(role)).collect(Collectors.toList());
+                .map(SimpleGrantedAuthority::new).collect(Collectors.toList());
 
         return new org.springframework.security.core.userdetails
                 .User(userArg, user.getPassword(), authorities);

@@ -2,6 +2,7 @@ package com.wext.wextservice.service;
 
 import com.wext.common.domain.exception.InvalidOperationException;
 import com.wext.common.domain.exception.NonExistentException;
+import com.wext.common.utils.WextTool;
 import com.wext.wextservice.domain.Path;
 import com.wext.wextservice.domain.PathCount;
 import com.wext.wextservice.repository.PathCountRepository;
@@ -36,7 +37,7 @@ public class PathService {
 
     public Path getPath(@NonNull String fullPath) {
         return pathRepository.findByFullPath(fullPath)
-                .orElseThrow(() -> new NonExistentException("Can not find this path."));
+                .orElseThrow(() -> new NonExistentException("Can not find the path of " + fullPath));
     }
 
     public List<Path> getPathsByPrefix(@NonNull String prePath,
@@ -90,6 +91,17 @@ public class PathService {
                 .fullPath(fullPath)
                 .parentId(parentId).build());
 
+    }
+
+    public Path createPath(@NonNull String fullPath) {
+        var paths = WextTool.splitPath(fullPath);
+        if (paths.size() < 2) {
+            throw new InvalidOperationException("Path length is too short.");
+        }
+        var parentFullPath = paths.get(paths.size() - 2);
+        var nodeName = fullPath.substring(fullPath.lastIndexOf("/"));
+        var parentPath = getPath(parentFullPath);
+        return createPath(nodeName, parentPath.getId());
     }
 
 
