@@ -15,8 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/message")
 @Slf4j
@@ -96,7 +94,7 @@ public class DirectMessageController {
     @GetMapping("/receives")
     public ResponseEntity getReceiveDM(@RequestHeader(USERID_HEADER) String userID,
                                    @RequestParam(required = false, defaultValue = "1") Integer page) {
-        List<DirectMessage> dms = dmService.getUserReceiveDM(Long.parseLong(userID), page);
+        var dms = dmService.getUserReceiveDM(Long.parseLong(userID), page);
         return ResponseEntity.ok(
                 BaseResponse.successResponse(dms)
         );
@@ -105,7 +103,7 @@ public class DirectMessageController {
     @GetMapping("/sends")
     public ResponseEntity getSendDM(@RequestHeader(USERID_HEADER) String userID,
                                     @RequestParam(required = false, defaultValue = "1") Integer page) {
-        List<DirectMessage> dms = dmService.getUserSendDM(Long.parseLong(userID), page);
+        var dms = dmService.getUserSendDM(Long.parseLong(userID), page);
         return ResponseEntity.ok(
                 BaseResponse.successResponse(dms)
         );

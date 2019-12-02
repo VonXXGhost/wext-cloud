@@ -80,7 +80,7 @@ public class PathRequestController {
         PRState prState = null;
         if (!state.equals("all")) {
             if (PRState.contains(state)) {
-                prState = PRState.valueOf(state);
+                prState = PRState.valueOf(state.toUpperCase());
             } else {
                 throw new InvalidOperationException("state argument is wrong");
             }
@@ -104,7 +104,7 @@ public class PathRequestController {
         PRState prState = null;
         if (!state.equals("all")) {
             if (PRState.contains(state)) {
-                prState = PRState.valueOf(state);
+                prState = PRState.valueOf(state.toUpperCase());
             } else {
                 throw new InvalidOperationException("state argument is wrong");
             }

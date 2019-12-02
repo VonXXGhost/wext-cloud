@@ -115,9 +115,13 @@ public class WextController {
 
         // 推送
         pusher.pushWext(CommonTool.transBean(wext, WextDTO.class));
-
+        TimelineItem item = puller.getTimelineItem(
+                FeedTool.geneFeedID(
+                        Objects.requireNonNull(CommonTool.transBean(wext, WextDTO.class))
+                )
+        );
         return ResponseEntity.ok(
-                BaseResponse.successResponse(wext)
+                BaseResponse.successResponse(item)
         );
     }
 

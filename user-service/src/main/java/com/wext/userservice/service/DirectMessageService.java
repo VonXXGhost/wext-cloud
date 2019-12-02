@@ -12,7 +12,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.TreeMap;
 
 @Service
 @Slf4j
@@ -36,7 +38,7 @@ public class DirectMessageService {
         return dms.getContent();
     }
 
-    public List<DirectMessage> getUserSendDM(@NonNull Long userId, Integer page) {
+    public Map<String, Object> getUserSendDM(@NonNull Long userId, Integer page) {
         if (page == null) {
             page = 1;
         }
@@ -44,11 +46,15 @@ public class DirectMessageService {
 
         Page<DirectMessage> dms = dmRepository
                 .findAllByUserIdFromOrderByCreatedTimeDesc(userId, pageable);
-        log.debug(dms.getContent().toString());
-        return dms.getContent();
+
+        Map<String, Object> res = new TreeMap<>();
+        res.put("total_pages", dms.getTotalPages());
+        res.put("dms", dms.getContent());
+        log.debug(res.toString());
+        return res;
     }
 
-    public List<DirectMessage> getUserReceiveDM(@NonNull Long userId, Integer page) {
+    public Map<String, Object> getUserReceiveDM(@NonNull Long userId, Integer page) {
         if (page == null) {
             page = 1;
         }
@@ -56,8 +62,12 @@ public class DirectMessageService {
 
         Page<DirectMessage> dms = dmRepository
                 .findAllByUserIdToOrderByCreatedTimeDesc(userId, pageable);
-        log.debug(dms.getContent().toString());
-        return dms.getContent();
+
+        Map<String, Object> res = new TreeMap<>();
+        res.put("total_pages", dms.getTotalPages());
+        res.put("dms", dms.getContent());
+        log.debug(res.toString());
+        return res;
     }
 
     public DirectMessage createNewDM(@NonNull Long userFrom, @NonNull Long userTo, @NonNull String content) {

@@ -10,6 +10,7 @@ import com.wext.wextservice.repository.PathRepository;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -53,8 +54,8 @@ public class PathService {
         return pathRepository.findAllByFullPathIsStartingWith(prePath, pageable).getContent();
     }
 
-    public List<Path> getChildPaths(@NonNull Long parentId,
-                                   Integer page, Integer pageSize) {
+    public Page<Path> getChildPaths(@NonNull Long parentId,
+                                    Integer page, Integer pageSize) {
         if (page == null || page < 1) {
             page = 1;
         }
@@ -63,7 +64,7 @@ public class PathService {
         }
         Pageable pageable = PageRequest.of(page - 1, pageSize);
 
-        return pathRepository.findAllByParentId(parentId, pageable).getContent();
+        return pathRepository.findAllByParentId(parentId, pageable);
     }
 
     public Path createPath(@NonNull String nodeName, Long parentId) {
@@ -99,7 +100,7 @@ public class PathService {
             throw new InvalidOperationException("Path length is too short.");
         }
         var parentFullPath = paths.get(paths.size() - 2);
-        var nodeName = fullPath.substring(fullPath.lastIndexOf("/"));
+        var nodeName = fullPath.substring(fullPath.lastIndexOf("/") + 1);
         var parentPath = getPath(parentFullPath);
         return createPath(nodeName, parentPath.getId());
     }

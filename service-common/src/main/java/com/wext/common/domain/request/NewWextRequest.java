@@ -18,7 +18,7 @@ public class NewWextRequest implements Serializable {
     private static final long serialVersionUID = -6718755449592748773L;
 
     @NotNull(message = "Content can not be null.")
-    @Size(max = 3000, message = "Comment too long")
+    @Size(min = 1, max = 3000, message = "Comment too long")
     private String content;
 
     @Size(max = 1, message = "Only up to 1 picture are allowed.")

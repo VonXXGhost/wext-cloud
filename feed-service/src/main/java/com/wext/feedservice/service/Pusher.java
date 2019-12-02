@@ -207,7 +207,9 @@ public class Pusher {
         String followingFeedKey = RedisKeyPrefixs.profileFeedKeyPrefix + followID;
         String followerTimelineKey = RedisKeyPrefixs.userTimelineFeedKeyPrefix + followerID;
         for (String feedID : stringRedisTool.zsetGetByRange(followingFeedKey, 0, 499)) {
-            stringRedisTool.zsetAdd(followerTimelineKey, feedID, -(double) FeedTool.getTimestampFromFeedID(feedID));
+            if (stringRedisTool.hasKey(followerTimelineKey)) {
+                stringRedisTool.zsetAdd(followerTimelineKey, feedID, -(double) FeedTool.getTimestampFromFeedID(feedID));
+            }
         }
         if (stringRedisTool.zsetSize(followerTimelineKey) > 550) {
             stringRedisTool.zsetRemove(followerTimelineKey, 501, -1);

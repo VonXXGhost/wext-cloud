@@ -3,6 +3,7 @@ package com.wext.wextservice.service;
 import com.wext.common.domain.exception.InvalidOperationException;
 import com.wext.common.domain.exception.NonExistentException;
 import com.wext.common.utils.WextTool;
+import com.wext.wextservice.client.ManagerService;
 import com.wext.wextservice.domain.PRState;
 import com.wext.wextservice.domain.PathRequest;
 import com.wext.wextservice.repository.PathRepository;
@@ -28,6 +29,9 @@ public class PathRequestService {
 
     @Autowired
     private PathRepository pathRepository;
+
+    @Autowired
+    private ManagerService managerService;
 
     private static final Integer defaultPageSize = 30;
 
@@ -108,6 +112,19 @@ public class PathRequestService {
         Map<String, Object> res = new TreeMap<>();
         res.put("total_pages", que.getTotalPages());
         res.put("requests", que.getContent());
+
+        // 添加manager信息
+        Map<Long, Object> managers = new TreeMap<>();
+        for (var request : que.getContent()) {
+            var mid = request.getManagerID();
+            if (mid != null && !managers.containsKey(mid)) {
+                var m = managerService.getManagerById(mid);
+                Map<String, Object> mInfo = new TreeMap<>();
+                mInfo.put("name", m.getName());
+                managers.put(mid, mInfo);
+            }
+        }
+        res.put("managers", managers);
         log.debug(res.toString());
         return res;
     }
@@ -133,6 +150,19 @@ public class PathRequestService {
         Map<String, Object> res = new TreeMap<>();
         res.put("total_pages", que.getTotalPages());
         res.put("requests", que.getContent());
+
+        // 添加manager信息
+        Map<Long, Object> managers = new TreeMap<>();
+        for (var request : que.getContent()) {
+            var mid = request.getManagerID();
+            if (mid != null && !managers.containsKey(mid)) {
+                var m = managerService.getManagerById(mid);
+                Map<String, Object> mInfo = new TreeMap<>();
+                mInfo.put("name", m.getName());
+                managers.put(mid, mInfo);
+            }
+        }
+        res.put("managers", managers);
         log.debug(res.toString());
         return res;
     }

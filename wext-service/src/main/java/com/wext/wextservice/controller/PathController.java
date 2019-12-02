@@ -46,7 +46,11 @@ public class PathController {
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("info", path);
 
-        result.put("children", pathService.getChildPaths(path.getId(), page, pageSize));
+        Map<String, Object> children = new LinkedHashMap<>();
+        var childPaths = pathService.getChildPaths(path.getId(), page, pageSize);
+        children.put("total_pages", childPaths.getTotalPages());
+        children.put("paths", childPaths.getContent());
+        result.put("children", children);
         log.debug(result.toString());
         return ResponseEntity.ok(
                 BaseResponse.successResponse(result)
@@ -57,7 +61,7 @@ public class PathController {
     public ResponseEntity hotChild(HttpServletRequest request,
                                    @RequestParam(required = false, defaultValue = "1") Integer page,
                                    @RequestParam(required = false, defaultValue = "30") Integer pageSize) {
-        var a = request.getServletPath();
+//        var a = request.getServletPath();
         String fullPath = request.getServletPath().substring("/path/hot".length());
         var key = "wext:path:hot::" + fullPath;
         List<PathCount> pathCounts;

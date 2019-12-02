@@ -12,10 +12,7 @@ eureka:
     serviceUrl:
       defaultZone: http://${eureka.instance.hostname}:8061/eureka/
 
-servlet:
-  multipart:
-    max-file-size: -1
-    max-request-size: -1
+
 upload:
   img-absolute-path: D://Study/Java/wextcould/resources-service/src/main/resources/static/imgs/
   img-path: /images/
@@ -24,3 +21,7 @@ upload:
 spring:
   application:
     name: resources-service
+  servlet:
+    multipart:
+      max-file-size: -1
+      max-request-size: -1
