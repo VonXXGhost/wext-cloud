@@ -65,12 +65,12 @@ public class Pusher {
     public void pushDeleteWextToPaths(@NonNull WextDTO wext) {
         String fullPath = wext.getFullPath();
         List<String> paths = WextTool.splitPath(fullPath);  // 应该推送的所有节点
-        log.info("Push " + wext.getId() + " To:" + paths);
         String feedID = FeedTool.geneFeedID(wext);
         for (String path : paths) {
             String feedKey = RedisKeyPrefixs.pathFeedKeyPrefix + path;
             if (stringRedisTool.hasKey(feedKey)) {  // 未被初始化的不推送
-                stringRedisTool.zsetRemove(feedKey, feedID);
+                log.debug("Push Delete " + feedID + " To:" + path);
+                var r = stringRedisTool.zsetRemove(feedKey, feedID);
             }
 
         }
@@ -79,6 +79,8 @@ public class Pusher {
     @Async
     public void updateWext(@NonNull WextDTO wext) {
         String wextKey = RedisKeyPrefixs.wextKeyPrefix + wext.getId();
+
+        wext.setPicList(WextTool.stringToPicsList(wext.getPics())); // string类型图片存储属性会被忽略，在存入redis前就要转换
         wextRedisTool.setIfPresent(wextKey, wext, wextTTL);
         log.info("Wext " + wext.getId() + " updated.");
         log.debug(wext.toString());

@@ -29,7 +29,7 @@ public class WextService {
     }
 
     public Wext createWext(@NonNull Long userID, @NonNull String text,
-                           String fullPath, List<String> pics) {
+                           String fullPath, List<String> pics){
         if (fullPath == null) {
             fullPath = "/";
         }
@@ -37,12 +37,8 @@ public class WextService {
 
         String pics_s = WextTool.picsListToString(pics);
         String wext_id = WextTool.geneWextID(userID);
-        // test
-//        while (wextRepository.findById(wext_id).isPresent()) {
-//            wext_id = WextTool.geneWextID(userID);
-//        }
-        // test
-        Wext wext = wextRepository.save(Wext.builder()
+
+        Wext wext = wextRepository.saveAndFlush(Wext.builder()
                 .id(wext_id)
                 .fullPath(fullPath)
                 .userId(userID)
@@ -53,6 +49,15 @@ public class WextService {
                 .repostCount(0L)
                 .build()
         );
+        // 注意：此时的时间戳带毫秒，需要重新转换
+//        String format = "yyyy-MM-dd HH:mm:ss zzz";
+//        SimpleDateFormat sdf = new SimpleDateFormat(format);
+//        String time = sdf.format(wext.getCreatedTime());
+//        try {
+//            wext.setCreatedTime(sdf.parse(time));
+//        } catch (ParseException e) {
+//            log.error(e.getMessage());
+//        }
         log.info("New wext: " + wext);
         return wext;
     }

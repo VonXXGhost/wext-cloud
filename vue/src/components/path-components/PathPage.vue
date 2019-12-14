@@ -17,7 +17,8 @@
                 发表
             </el-button>
         </div>
-        <timeline-stream :timeline-items="timelineItems" class="timeline-stream"></timeline-stream>
+        <el-divider></el-divider>
+        <timeline-stream :timeline-items="timelineItems"></timeline-stream>
         <unknown-end-pages :empty-result="emptyResult"></unknown-end-pages>
     </div>
 </template>
@@ -114,8 +115,9 @@
                     .finally(() => loading.close());
             },
             loadWexts() {
-                let loadingInstance = Loading.service({target: '.timeline-stream'});
                 this.timelineItems = [];
+                let loadingInstance = Loading.service({target: '.timeline-stream'});
+
                 axios.get(apiConfig.pathFeed(this.fullPath), {
                     params: {page: this.$route.query.page || 1}
                 })
@@ -128,7 +130,7 @@
                         this.$notify.error({
                             title: '无法获取节点时间线',
                             message: error.msg ? error.msg : '无法连接到服务器',
-                            duration: 0
+                            duration: 10000
                         });
                         this.emptyResult = true;
                     })
@@ -144,14 +146,13 @@
                 this.showUpload = true;
             }
         },
+        mounted() {
+            this.loadWexts();
+        },
         watch: {
-            $route: {
-                // eslint-disable-next-line no-unused-vars
-                handler(newV, oldV) {
+            $route() {
                     this.loadWexts();
-                },
-                immediate: true
-            }
+                }
         }
     }
 </script>
@@ -163,6 +164,7 @@
 
     .wext-write-container {
         display: flex;
+        margin: 12px 10%;
     }
 
     .uploaded-img {
@@ -170,7 +172,6 @@
         height: 148px;
         display: block;
     }
-
 </style>
 
 <style>

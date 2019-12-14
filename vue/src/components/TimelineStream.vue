@@ -71,7 +71,7 @@
             </div>
         </div>
         <div class="stream" v-if="!timelineItems || timelineItems.length === 0">
-            <div class="timeline-card">
+            <div class="timeline-card non-exist">
                 <p>
                     当前节点已无条目
                 </p>
@@ -98,7 +98,12 @@
 <style scoped>
     .timeline-card {
         text-align: left;
-        margin: 25px 5%;
+        margin: 0 5%;
+        padding: 25px 5%;
+        background-color: rgba(255, 250, 221, 0.4);
+        border-radius: 32px;
+        border-left: 4px solid rgb(255, 250, 221);
+        border-right: 4px solid rgb(255, 250, 221);
     }
 
     .repost-panel {
@@ -143,6 +148,7 @@
     .card-content {
         margin: 2px;
         padding: 6px;
+        white-space: pre-wrap;
     }
 
     .content-path {
@@ -178,4 +184,10 @@
         font-size: 0.9em;
     }
 
+    .timeline-card.non-exist {
+        text-align: center;
+    }
+
+    .timeline-stream {
+    }
 </style>

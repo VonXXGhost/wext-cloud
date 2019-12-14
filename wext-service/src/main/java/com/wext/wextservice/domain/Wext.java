@@ -51,5 +51,6 @@ public class Wext implements Serializable {
     @Column(name = "created_time", columnDefinition = "datetime", updatable = false)
     @Temporal(TemporalType.TIMESTAMP)
     @CreationTimestamp
+    /* 注意：MySQL版本必须高于5.6.4并定义为datetime(3)，否则会丢失精度造成严重的业务错误 */
     private Date createdTime;
 }

@@ -39,20 +39,24 @@
             </div>
 
             <div class="wext-actions">
-                <el-button round icon="el-icon-share" :class="{'has-do': hasRepost}"
-                           @dblclick.native="repostButtonAct" @click="switchToReposts">
-                    转发&ensp;{{wextDetail.wext.repostCount}}
-                </el-button>
+                <el-tooltip placement="top" content="双击以转发或取消转发">
+                    <el-button round icon="el-icon-share" :class="{'has-do': hasRepost}"
+                               @dblclick.native="repostButtonAct" @click="switchToReposts">
+                        转发&ensp;{{wextDetail.wext.repostCount}}
+                    </el-button>
+                </el-tooltip>
                 <el-button round icon="el-icon-s-comment" @click="switchToComments()">
                     评论&ensp;{{wextDetail.wext.commentCount}}
                 </el-button>
-                <el-button round icon="el-icon-star-off" :class="{'has-do': hasLike}"
-                           @click="switchToLikes()" @dblclick.native="likeButtonAct">
-                    点赞&ensp;{{wextDetail.wext.likeCount}}
-                </el-button>
+                <el-tooltip placement="top" content="双击以点赞或取消点赞">
+                    <el-button round icon="el-icon-star-off" :class="{'has-do': hasLike}"
+                               @click="switchToLikes()" @dblclick.native="likeButtonAct">
+                        点赞&ensp;{{wextDetail.wext.likeCount}}
+                    </el-button>
+                </el-tooltip>
 
                 <el-button class="delete-wext" v-if="loginUser.id === wextDetail.wext.userId"
-                           type="danger">
+                           type="danger" @click="deleteWext">
                     删除
                 </el-button>
             </div>
@@ -385,7 +389,8 @@
                             })
                             .finally(() => commentsLoading.close());
                     })
-                    .catch(() => {});   // 不catch的话console会报错
+                    .catch(() => {
+                    });   // 不catch的话console会报错
             },
             postComment() {
                 if (!this.newComment || this.newComment.length === 0) {
@@ -533,6 +538,26 @@
                 } else {
                     this.doRepost();
                 }
+            },
+            deleteWext() {
+                this.$alert('删除Wext之后不可恢复，是否确认删除？', '确认删除')
+                    .then(() => {
+                        let loadingInstance = Loading.service({target: '.wext-page'});
+                        this.$axios.delete(apiConfig.wextDetail(this.wextID))
+                            .then(() => {
+                                this.$router.push('/home');
+                            })
+                            .catch(error => {
+                                console.error(error);
+                                this.$notify.error({
+                                    title: '删除错误',
+                                    message: error.msg ? error.msg : '无法连接到服务器',
+                                    duration: 10000
+                                });
+                            })
+                            .finally(() => loadingInstance.close());
+                    })
+
             }
         },
         data() {
@@ -549,36 +574,29 @@
                 hasLike: false
             }
         },
-        watch: {
-            wextID: {
-                // eslint-disable-next-line no-unused-vars
-                handler(n, o) {
-                    let detailLoading = Loading.service({target: '.wext-detail'});
-                    this.$axios.get(apiConfig.wextDetail(n))
-                        .then(resp => {
-                            this.wextDetail = resp.data.data;
-                        })
-                        .catch(error => {
-                            console.error(error);
-                            this.$notify.error({
-                                title: '错误',
-                                message: '无法获取Wext详情',
-                                duration: 15000
-                            });
-                        })
-                        .finally(() => detailLoading.close());
-                    // 加载
-                    if (this.viewType === 'comment') {
-                        this.loadComments(1);
-                    } else if (this.viewType === 'like') {
-                        this.loadLikes(1);
-                    }
-                    this.loadHas();
-                },
-                immediate: true
+        mounted() {
+            let detailLoading = Loading.service({target: '.wext-page'});
+            this.$axios.get(apiConfig.wextDetail(this.wextID))
+                .then(resp => {
+                    this.wextDetail = resp.data.data;
+                })
+                .catch(error => {
+                    console.error(error);
+                    this.$notify.error({
+                        title: '错误',
+                        message: '无法获取Wext详情',
+                        duration: 15000
+                    });
+                })
+                .finally(() => detailLoading.close());
+            // 加载
+            if (this.viewType === 'comment') {
+                this.loadComments(1);
+            } else if (this.viewType === 'like') {
+                this.loadLikes(1);
             }
+            this.loadHas();
         }
-
     }
 </script>
 
@@ -638,6 +656,7 @@
 
     .wext-content {
         word-break: break-word;
+        white-space: pre-wrap;
     }
 
     .origin-time {
@@ -675,7 +694,7 @@
         text-align: left;
         text-indent: 2em;
         word-break: break-word;
-
+        white-space: pre-wrap;
     }
 
     .like_container {

@@ -59,6 +59,13 @@
                 </div>
             </el-dialog>
         </div>
+        <div class="user-info-actions" v-if="loginUser && loginUser.id === userInfo_c.info.id">
+            <router-link to="/settings">
+                <el-button>
+                    修改个人设置
+                </el-button>
+            </router-link>
+        </div>
     </div>
 </template>
 

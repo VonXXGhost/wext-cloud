@@ -334,6 +334,7 @@
         text-indent: 1em;
         width: 90%;
         word-break: break-word;
+        white-space: pre-wrap;
     }
 
     .actions {

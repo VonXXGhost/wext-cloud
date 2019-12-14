@@ -12,6 +12,7 @@ import AllPaths from "@/components/path-components/AllPaths";
 import PathRequestUser from "@/components/path-components/PathRequestUser";
 import PathRequestManage from "@/components/path-components/PathRequestManage";
 import DMPage from "@/components/DMPage";
+import UserSettings from "@/components/user-components/UserSettings";
 
 Vue.use(VueRouter);
 
@@ -88,6 +89,17 @@ const routes = [
         path: '/dm',
         name: 'direct-message',
         component: DMPage,
+        meta: {
+            needAuth: true
+        }
+    },
+    {
+        path: '/settings',
+        name: 'user-settings',
+        component: UserSettings,
+        meta: {
+            needAuth: true
+        }
     }
 ];
 
