@@ -7,6 +7,7 @@ export default {
     userProfileFeed: username => baseUrl + `timeline/user/${username}`,
     login: baseUrl + 'auth/login',
     signUp: baseUrl + 'auth/signup',
+    changePassword: baseUrl + 'auth/password',
     selfInfo: baseUrl + 'user/me',
     userInfo: username => baseUrl + `user/${username}/info`,
     userFollow: username => baseUrl + `user/${username}/follow`,
@@ -26,6 +27,7 @@ export default {
                                 baseUrl + `wext/${id}/comment/${cid}` :
                                 baseUrl + `wext/${id}/comment`,
     uploadPic: baseUrl + 'upload/image',
+    uploadIcon: baseUrl + 'upload/profile_icon',
     dmReceives: baseUrl + 'message/receives',
     dmSends: baseUrl + 'message/sends',
     dmRead: baseUrl + 'message/read',

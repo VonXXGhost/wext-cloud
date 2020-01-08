@@ -22,7 +22,7 @@
                             <el-avatar class="user-icon" icon="el-icon-user-solid" v-if="!loginUser.iconUrl"></el-avatar>
                             <el-avatar class="user-icon" :src="baseAPIUrl + loginUser.iconUrl" v-if="loginUser.iconUrl"></el-avatar>
                             <span class="user-screen-name">
-                                {{loginUser.screenName}}
+                                {{loginUser.nickname}}
                             </span>
                         </span>
                     </router-link>

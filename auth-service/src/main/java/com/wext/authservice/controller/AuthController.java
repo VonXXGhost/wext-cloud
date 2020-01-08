@@ -11,6 +11,10 @@ import com.wext.common.domain.UserDTO;
 import com.wext.common.domain.request.AuthenticationRequest;
 import com.wext.common.domain.request.UserInfoRequest;
 import feign.FeignException;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,6 +25,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.Serializable;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -116,15 +121,31 @@ public class AuthController {
         }
     }
 
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    private static class PasswordChangeRequest implements Serializable {
+
+        private static final long serialVersionUID = -6986746375915710855L;
+
+        private String oldPassword;
+        private String newPassword;
+    }
+
     @PostMapping("/password")
     public ResponseEntity updatePassword(@RequestHeader(USERID_HEADER) Long id,
-                                         @RequestBody UserInfoRequest infoRequest) {
-        if (infoRequest == null || infoRequest.getPassword() == null) {
+                                         @RequestBody PasswordChangeRequest infoRequest) {
+        if (infoRequest == null || infoRequest.getNewPassword() == null || infoRequest.getOldPassword() == null) {
             return ResponseEntity.badRequest()
                     .body(BaseResponse.failResponse("Necessary parameters are not satisfied."));
         }
 
-        userService.updateUserPassword(id, infoRequest.getPassword());
+        // 验证旧密码
+        userAuthenticationManager.authenticate(new UsernamePasswordAuthenticationToken(id.toString(), infoRequest.getOldPassword()));
+
+        // 更新信息
+        userService.updateUserPassword(id, infoRequest.getNewPassword());
 
         // 更新用户更新时间
         var key = RedisKeyPrefixs.lastPasswordUpdatePrefix + id;
@@ -132,7 +153,7 @@ public class AuthController {
         // 返回新token
         String token = jwtTokenProvider.createToken(String.valueOf(id), Collections.singletonList("USER"));
         Map<Object, Object> model = new HashMap<>();
-        model.put("user", userService.getUserInfo(id));
+//        model.put("user", userService.getUserInfo(id));
         model.put("token", token);
         return ResponseEntity.ok(
                 BaseResponse.successResponse(model)

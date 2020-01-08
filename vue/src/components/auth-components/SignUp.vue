@@ -31,7 +31,10 @@
             let validatePass = (rule, value, callback) => {
                 if (value === '') {
                     callback(new Error('请输入密码'));
-                } else {
+                } else if (rule.pattern && !rule.pattern.test(value)) {
+                    callback(new Error('密码格式错误'));
+                }
+                else {
                     if (this.signUpForm.password_confirm !== '') {
                         this.$refs.signUpForm.validateField('password_confirm');
                     }
@@ -64,7 +67,7 @@
                     ],
                     password: [
                         {
-                            required: true, message: '请输入正确的密码', trigger: 'blur',
+                            required: true, message: '请输入正确格式的密码', trigger: 'blur',
                             // pattern: /^[a-zA-Z0-9`~!@#$%^&*()_+\-={}|[\]\\;':"<>?,./]{6,18}$/
                             pattern: /^[!-~]{6,18}$/, validator: validatePass
                         }
@@ -109,5 +112,7 @@
 </script>
 
 <style scoped>
-
+    .signup_container {
+        margin: 28px 25%;
+    }
 </style>

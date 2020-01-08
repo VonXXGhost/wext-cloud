@@ -69,5 +69,7 @@
 </script>
 
 <style scoped>
-
+    .login_container {
+        margin: 28px 25%;
+    }
 </style>

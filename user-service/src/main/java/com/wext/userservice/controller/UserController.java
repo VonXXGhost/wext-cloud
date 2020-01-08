@@ -57,7 +57,8 @@ public class UserController {
 
         if (body.getNickname() != null) {
             attrs.put("nickname", body.getNickname());
-        } else if (body.getProfile() != null) {
+        }
+        if (body.getProfile() != null) {
             attrs.put("profile", body.getProfile());
         }
 

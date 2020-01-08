@@ -100,7 +100,7 @@
         text-align: left;
         margin: 0 5%;
         padding: 25px 5%;
-        background-color: rgba(255, 250, 221, 0.4);
+        background-color: rgba(255, 250, 221, 0.15);
         border-radius: 32px;
         border-left: 4px solid rgb(255, 250, 221);
         border-right: 4px solid rgb(255, 250, 221);

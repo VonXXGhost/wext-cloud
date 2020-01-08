@@ -37,8 +37,16 @@ spring:
       routes:
         - id: auth_route
           uri: lb://auth-service
+          order: 2
           predicates:
             - Path=/auth/**
+        - id: changePW_route
+          uri: lb://auth-service
+          order: 1
+          predicates:
+            - Path=/auth/password
+          filters:
+            - name: AuthFilter
         - id: user_route
           uri: lb://user-service
           predicates:
