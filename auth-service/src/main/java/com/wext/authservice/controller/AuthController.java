@@ -161,9 +161,9 @@ public class AuthController {
     }
 
     private boolean checkUserInfoRequest(UserInfoRequest data) {
-        return Pattern.matches("^[a-zA-Z]\\w{3,11}$", data.getScreenName()) &&
+        return Pattern.matches("^[a-zA-Z]\\w{3,17}$", data.getScreenName()) &&
 //                Pattern.matches("[a-zA-Z0-9`~!@#$%^&*()_+\\-={}|\\[\\]\\\\;':\"<>?,./]{6,18}", data.getPassword()) &&
-                Pattern.matches("^[!-~]{6,18}$", data.getPassword()) && // 所有键盘的可见字符
+                Pattern.matches("^[!-~]{6,24}$", data.getPassword()) && // 所有键盘的可见字符
                 Pattern.matches("^\\S{1,16}$", data.getNickname()) &&
                 Pattern.matches("^(.+)@(.+)$", data.getEmail());
 

@@ -30,10 +30,10 @@ public class User implements Serializable {
     private String password;
 
     @Column(name = "screen_name", unique = true, nullable = false, updatable = false)
-    @Length(max = 16)
+    @Length(max = 32)
     private String screenName;
 
-    @Length(max = 32)
+    @Length(max = 64)
     private String nickname;
 
     @Column(nullable = false, unique = true)

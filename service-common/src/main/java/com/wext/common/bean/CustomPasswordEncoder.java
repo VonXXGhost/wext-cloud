@@ -1,5 +1,6 @@
 package com.wext.common.bean;
 
+import org.bouncycastle.util.encoders.Hex;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -11,8 +12,12 @@ public class CustomPasswordEncoder implements PasswordEncoder {
     @Override
     public String encode(CharSequence charSequence) {
         try {
-            return new String(MessageDigest.getInstance("SHA-256")
-                    .digest(charSequence.toString().getBytes()));
+//            return new String(MessageDigest.getInstance("SHA-256")
+//                    .digest(charSequence.toString().getBytes()));
+            return Hex.toHexString(
+                    MessageDigest.getInstance("SHA-256")
+                            .digest(charSequence.toString().getBytes())
+            );
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
             return "";
@@ -22,8 +27,12 @@ public class CustomPasswordEncoder implements PasswordEncoder {
     @Override
     public boolean matches(CharSequence charSequence, String s) {
         try {
-            String pw = new String(MessageDigest.getInstance("SHA-256")
-                    .digest(charSequence.toString().getBytes()));
+//            String pw = new String(MessageDigest.getInstance("SHA-256")
+//                    .digest(charSequence.toString().getBytes()));
+            String pw = Hex.toHexString(
+                    MessageDigest.getInstance("SHA-256")
+                            .digest(charSequence.toString().getBytes())
+            );
             return pw.equals(s);
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
