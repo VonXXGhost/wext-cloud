@@ -140,7 +140,11 @@
             postPathRequest() {
                 let loadingInstance = Loading.service({target: '.requester'});
                 let request = JSON.parse(JSON.stringify(this.form));
-                request.fullPath = this.fullPath + '/' + request.fullPath;
+                if (this.fullPath.lastIndexOf('/') === (this.fullPath.length - 1)) {
+                    request.fullPath = this.fullPath + request.fullPath;
+                } else {
+                    request.fullPath = this.fullPath + '/' + request.fullPath;
+                }
                 this.$axios.put(apiConfig.prPut, request)
                     .then(() => {
                         this.$message.info("已成功提交申请");

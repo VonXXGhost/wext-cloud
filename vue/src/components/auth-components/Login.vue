@@ -48,6 +48,7 @@
                         )
                             .then(() => {
                                 // 重定向到之前的页面
+                                console.debug(this.$route.query.redirect);
                                 if (this.$route.query.redirect) {
                                     this.$router.push(decodeURI(this.$route.query.redirect));
                                 } else {

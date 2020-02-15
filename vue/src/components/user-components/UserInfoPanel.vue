@@ -23,9 +23,11 @@
                 <span class="following">
                     正在关注:{{userInfo_c.info.followings}}
                 </span>
+                <el-divider direction="vertical"></el-divider>
                 <span class="follower">
                     追随者:{{userInfo_c.info.followers}}
                  </span>
+                <el-divider direction="vertical"></el-divider>
                 <span class="relationship"
                       v-if="userInfo_c.relationship && userInfo_c.relationship !== 'stranger'">
                      -&ensp;{{relationShow[userInfo_c.relationship]}}&ensp;-
@@ -176,9 +178,12 @@
 
 <style scoped>
     .user-info-panel {
-        border: #fffadd solid 4px;
-        margin: 16px 32px;
+        border-color: #858585;
+        border-style: solid;
+        border-width: 0 2px;
+        margin: 16px 8%;
         padding: 16px;
+        border-radius: 16px;
     }
 
     .user-icon {
@@ -208,7 +213,7 @@
     }
 
     .follow-data > span {
-        margin: 4px 8px;
+        padding: 4px 8px;
     }
 
     .relationship {

@@ -18,9 +18,11 @@
                 </router-link>
             </div>
             <div class="content-path">
-                <router-link :to="'/path' + wextDetail.wext.fullPath">
-                    >>>&ensp;{{wextDetail.wext.fullPath}}
-                </router-link>
+                <el-divider content-position="left">
+                    <router-link :to="'/path' + wextDetail.wext.fullPath">
+                        >>>&ensp;{{wextDetail.wext.fullPath}}
+                    </router-link>
+                </el-divider>
             </div>
 
             <p class="wext-content">
@@ -45,9 +47,11 @@
                         转发&ensp;{{wextDetail.wext.repostCount}}
                     </el-button>
                 </el-tooltip>
+                <el-divider direction="vertical"></el-divider>
                 <el-button round icon="el-icon-s-comment" @click="switchToComments()">
                     评论&ensp;{{wextDetail.wext.commentCount}}
                 </el-button>
+                <el-divider direction="vertical"></el-divider>
                 <el-tooltip placement="top" content="双击以点赞或取消点赞">
                     <el-button round icon="el-icon-star-off" :class="{'has-do': hasLike}"
                                @click="switchToLikes()" @dblclick.native="likeButtonAct">
@@ -153,6 +157,9 @@
                         </div>
                         <div class="floor">
                             # {{comment.floor}}
+                            <el-button class="delete-comment" icon="el-icon-delete" type="danger" @click="deleteComment(comment.id)"
+                                       v-if="loginUser && loginUser.id === comment.userId">
+                            </el-button>
                         </div>
                     </div>
                     <div class="comment-content">
@@ -161,10 +168,7 @@
                     <div class="comment-footer origin-time">
                         {{comment.createdTime | dateformat}}
                     </div>
-                    <el-button class="delete-comment" type="danger" @click="deleteComment(comment.id)"
-                               v-if="loginUser && loginUser.id === comment.userId">
-                        删除评论
-                    </el-button>
+
                     <el-divider></el-divider>
                 </div>
                 <el-pagination
@@ -611,7 +615,7 @@
         justify-content: left;
         margin: 4px 32px;
         padding: 8px;
-        border-bottom: #27d9f5 4px solid;
+        border-bottom: #27d9f5 2px solid;
         max-width: 320px;
     }
 
@@ -647,7 +651,6 @@
         margin: 8px 40px;
         font-style: italic;
         color: #59b6e6;
-        font-size: 0.9em;
     }
 
     .content-path a {
@@ -657,6 +660,8 @@
     .wext-content {
         word-break: break-word;
         white-space: pre-wrap;
+        text-align: left;
+        padding: 6px 38px;
     }
 
     .origin-time {
@@ -707,6 +712,10 @@
 
     .has-do {
         color: #7c65e6;
+    }
+
+    .delete-comment {
+        margin: 0 4px;
     }
 
 </style>

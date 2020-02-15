@@ -21,7 +21,7 @@ import java.util.Map;
 public class WextService {
 
     private WextRepository wextRepository;
-    private static final Integer defaultPageSize = 50;
+    private static final Integer DEFAULT_PAGE_SIZE = 50;
 
     @Autowired
     public WextService(WextRepository wextRepository) {
@@ -84,7 +84,7 @@ public class WextService {
             page = 1;
         }
         if (pageSize == null || pageSize < 1) {
-            pageSize = defaultPageSize;
+            pageSize = DEFAULT_PAGE_SIZE;
         }
         Pageable pageable = PageRequest.of(page - 1, pageSize);
 
@@ -99,7 +99,7 @@ public class WextService {
             page = 1;
         }
         if (pageSize == null || pageSize < 1) {
-            pageSize = defaultPageSize;
+            pageSize = DEFAULT_PAGE_SIZE;
         }
         Pageable pageable = PageRequest.of(page - 1, pageSize);
 
@@ -159,7 +159,7 @@ public class WextService {
         // TODO id不存在时可能是中途被删除了，考虑读出时间进行获取
 
         if (pageSize == null || pageSize < 1) {
-            pageSize = defaultPageSize;
+            pageSize = DEFAULT_PAGE_SIZE;
         }
         Pageable pageable = PageRequest.of(0, pageSize);
 
@@ -180,7 +180,7 @@ public class WextService {
         // TODO id不存在时可能是中途被删除了，考虑读出时间进行获取
 
         if (pageSize == null || pageSize < 1) {
-            pageSize = defaultPageSize;
+            pageSize = DEFAULT_PAGE_SIZE;
         }
         Pageable pageable = PageRequest.of(0, pageSize);
 
@@ -198,7 +198,7 @@ public class WextService {
             page = 1;
         }
         if (pageSize == null || pageSize < 1) {
-            pageSize = defaultPageSize;
+            pageSize = DEFAULT_PAGE_SIZE;
         }
         Pageable pageable = PageRequest.of(page - 1, pageSize);
 

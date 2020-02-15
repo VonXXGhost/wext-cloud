@@ -1,6 +1,7 @@
 <template>
     <div class="user-profile-page">
         <user-info-panel :user-info="userInfo" class="user-info-panel"></user-info-panel>
+        <el-divider></el-divider>
         <timeline-stream :timeline-items="timelineItems" class="timeline-stream"></timeline-stream>
         <unknown-end-pages :empty-result="emptyResult"></unknown-end-pages>
     </div>

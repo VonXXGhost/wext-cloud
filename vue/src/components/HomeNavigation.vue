@@ -73,10 +73,7 @@
                         name: '私信信息',
                         router: '/dm'
                     },
-                    {
-                        name: '关于本站',
-                        router: '/about'
-                    },
+
                 ],
                 baseAPIUrl: apiConfig.base.substr(0, apiConfig.base.length - 1)
             }

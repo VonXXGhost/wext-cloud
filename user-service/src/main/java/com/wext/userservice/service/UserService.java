@@ -97,7 +97,7 @@ public class UserService {
             throws AuthorityLimitException {
         screenName = screenName.toLowerCase();
 
-        if (!Pattern.matches("^[a-zA-Z]\\w{3,17}$", screenName) &&    // 用户名由字母、数字和下划线构成
+        if (!Pattern.matches("^[a-zA-Z]\\w{3,31}$", screenName) &&    // 用户名由字母、数字和下划线构成
                 !userRepository.findByScreenName(screenName).isPresent()) { // 用户已存在
             throw new InvalidOperationException("Username Error.Format wrong or username has used.");
         }

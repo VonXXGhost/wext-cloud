@@ -26,11 +26,13 @@
                 </div>
 
                 <div class="card-content">
-                    <div class="content-path">
-                        <router-link :to="'/path' + item.wext.fullPath">
-                            >>>&ensp;{{item.wext.fullPath}}
-                        </router-link>
-                    </div>
+                    <el-divider content-position="left">
+                        <div class="content-path">
+                            <router-link :to="'/path' + item.wext.fullPath">
+                                >>>&ensp;{{item.wext.fullPath}}
+                            </router-link>
+                        </div>
+                    </el-divider>
                     <p class="content-text">
                         {{item.wext.text}}
                     </p>
@@ -54,11 +56,13 @@
                             转发&ensp;{{item.wext.repostCount}}
                         </el-button>
                     </router-link>
+                    <el-divider direction="vertical"></el-divider>
                     <router-link :to="{name:'wext-page', params: {wextID: item.wext.id, view: 'comment'}}">
                         <el-button size="mini" round icon="el-icon-s-comment">
                             评论&ensp;{{item.wext.commentCount}}
                         </el-button>
                     </router-link>
+                    <el-divider direction="vertical"></el-divider>
                     <router-link :to="{name:'wext-page', params: {wextID: item.wext.id, view: 'like'}}">
                         <el-button size="mini" round icon="el-icon-star-off">
                             点赞&ensp;{{item.wext.likeCount}}
@@ -152,10 +156,8 @@
     }
 
     .content-path {
-        font-size: 0.9em;
         font-style: italic;
         color: #59b6e6;
-        margin: 0 4px;
     }
 
     .content-path a {
@@ -163,7 +165,6 @@
     }
 
     .content-text {
-        text-indent: 1em;
         word-break: break-word;
     }
 

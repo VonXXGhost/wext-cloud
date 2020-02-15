@@ -23,7 +23,12 @@
 
 <script>
     export default {
-        name: "HomePage"
+        name: "HomePage",
+        mounted() {
+            if (this.$store.state.auth.loginUser) {
+                this.$router.push('/home');
+            }
+        }
     }
 </script>
 

@@ -35,7 +35,7 @@ feign:
 
 wext:
   keyTTL:
-    pathFeed: 300 # 5 min
-    wextItem: 300 # 5 min
-    userEntity: 300 # 5 min
-    timelineFeed: 300 # 5 min
+    pathFeed: 259200 # 72h
+    wextItem: 3600 # 1h
+    userEntity: 3600 # 1h
+    timelineFeed: 259200 # 72h

@@ -1,5 +1,8 @@
 <template>
     <div class="home-timeline-page">
+        <div id="home-title">
+            我的关注
+        </div>
         <timeline-stream :timeline-items="timelineItems" class="timeline-stream"></timeline-stream>
         <unknown-end-pages :empty-result="emptyResult"></unknown-end-pages>
     </div>
@@ -56,5 +59,16 @@
 </script>
 
 <style scoped>
-
+    #home-title {
+        border-bottom: darkgrey 4px solid;
+        border-radius: 4px;
+        width: 20%;
+        text-align: left;
+        margin: 4px 7% 25px;
+        font-size: 1.25em;
+        color: grey;
+        padding: 0 16px 6px;
+        font-weight: bold;
+        letter-spacing: 0.25em;
+    }
 </style>

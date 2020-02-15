@@ -190,8 +190,8 @@ public class Pusher {
                     FeedTool.geneFeedID(wext),
                     -(double) wext.getCreatedTime().getTime()); // 自己的feed
         }
-        pushToFollowers(wext);  // follower timeline feed
         pushWextToPaths(wext);  // 路径feed
+        pushToFollowers(wext);  // follower timeline feed
     }
 
     @Async

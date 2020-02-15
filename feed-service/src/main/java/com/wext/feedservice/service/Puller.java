@@ -20,6 +20,7 @@ import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.concurrent.LinkedBlockingDeque;
 import java.util.stream.Collectors;
 
 @Component
@@ -47,8 +48,8 @@ public class Puller {
 
     private static final int defaultPageSize = 100;
 
-    private Queue<Long> userIDBuffer = new LinkedList<>();  // 待读取sql写入redis的用户id
-    private Queue<String> wextIDBuffer = new LinkedList<>();  // 待读取sql写入redis的wext id
+    private Queue<Long> userIDBuffer = new LinkedBlockingDeque<>();  // 待读取sql写入redis的用户id
+    private Queue<String> wextIDBuffer = new LinkedBlockingDeque<>();  // 待读取sql写入redis的wext id
 
     @Autowired
     public Puller(WextService wextService, UserService userService, RepostService repostService, RedisTool<WextDTO> wextRedisTool, RedisTool<String> stringRedisTool, RedisTool<Object> objectRedisTool) {
@@ -254,7 +255,7 @@ public class Puller {
                 // 不存在，建立
                 List<WextDTO> wexts = wextService.getWextsOfUser(userID, 1, 500);
                 List<RepostDTO> reposts = repostService.getRepostsFromUser(userID, 1, 500);
-                timelineItems = mergeWextAndRepost(wexts, reposts, 100);
+                timelineItems = mergeWextAndRepost(wexts, reposts, 500);
                 // 转化为对应格式存储到redis中
                 transAndAddToRedisFeed(profileFeedKey, timelineItems);
                 timelineItems = timelineItems.subList(
@@ -340,10 +341,6 @@ public class Puller {
          * 只有转发时有userID参数，对应转发者的id
          */
         List<TimelineItem> timelineItems = new ArrayList<>(feedIDs.size());
-//        for (var feedID : feedIDs) {
-//            String wextID = FeedTool.getIDFromFeedID(feedID);
-//            wexts.add(pullWext(wextID));
-//        }
         var wexts = new ArrayList<WextDTO>(feedIDs.size());
         feedIDs.stream()
                 .map(FeedTool::getIDFromFeedID)
@@ -443,7 +440,7 @@ public class Puller {
         if (!stringRedisTool.hasKey(feedKey)) {
             // 初始化的情况
             Long pullPage = 1L;
-            Integer pullPageSize = 1000;
+            Integer pullPageSize = 500;
             List<Long> followings = userService.getUserFollowingIds(userID, pullPage, pullPageSize);
             while (!followings.isEmpty()) { // 取得所有关注用户融合后的feedID
                 feedIDs = mergeFeedIDs(feedIDs, mergeUserFeed(followings), 500);    // reduce逻辑
