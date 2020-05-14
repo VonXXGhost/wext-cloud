@@ -22,7 +22,7 @@
                                         :to="{name: 'user-profile', params: {userID: userInfos[dm.userIdFrom].screenName}}">
                                     <el-avatar class="user-icon" icon="el-icon-user-solid"
                                                v-if="!userInfos[dm.userIdFrom].iconUrl"></el-avatar>
-                                    <el-avatar class="user-icon" :src="baseAPIUrl + iuserInfos[dm.userIdFrom].iconUrl"
+                                    <el-avatar class="user-icon" :src="baseAPIUrl + userInfos[dm.userIdFrom].iconUrl"
                                                v-if="userInfos[dm.userIdFrom].iconUrl"></el-avatar>
                                     <div class="user-names">
                                         <div class="user-nickname">
@@ -36,7 +36,7 @@
                             </div>
                             <div class="user-info" v-if="!userInfos[dm.userIdFrom]">
                                 <router-link
-                                        :to="{name: 'user-profile', params: {userID: userInfos[dm.userIdFrom].screenName}}">
+                                        :to="{name: 'user-profile', params: {userID: dm.userIdFrom}}">
                                     <el-avatar class="user-icon" icon="el-icon-user-solid" :size="50"></el-avatar>
                                     <div class="user-names">
                                         <div class="user-nickname">
@@ -89,7 +89,7 @@
                                         :to="{name: 'user-profile', params: {userID: userInfos[dm.userIdTo].screenName}}">
                                     <el-avatar class="user-icon" icon="el-icon-user-solid"
                                                v-if="!userInfos[dm.userIdTo].iconUrl"></el-avatar>
-                                    <el-avatar class="user-icon" :src="baseAPIUrl + iuserInfos[dm.userIdTo].iconUrl"
+                                    <el-avatar class="user-icon" :src="baseAPIUrl + userInfos[dm.userIdTo].iconUrl"
                                                v-if="userInfos[dm.userIdTo].iconUrl"></el-avatar>
                                     <div class="user-names">
                                         <div class="user-nickname">
@@ -103,7 +103,7 @@
                             </div>
                             <div class="user-info" v-if="!userInfos[dm.userIdTo]">
                                 <router-link
-                                        :to="{name: 'user-profile', params: {userID: userInfos[dm.userIdTo].screenName}}">
+                                        :to="{name: 'user-profile', params: {userID: dm.userIdTo}}">
                                     <el-avatar class="user-icon" icon="el-icon-user-solid" :size="50"></el-avatar>
                                     <div class="user-names">
                                         <div class="user-nickname">
@@ -171,7 +171,8 @@
                 pageType: 'r',
                 dms: [],
                 totalPages: 1,
-                userInfos: {}
+                userInfos: {},
+                baseAPIUrl: apiConfig.base.substr(0, apiConfig.base.length - 1)
             }
         },
         methods: {
@@ -267,7 +268,8 @@
         },
         watch: {
             pageType: {
-                handler() {
+                handler(n) {
+                    this.pageType = n;
                     this.loadDMs(1);
                 },
                 immediate: true

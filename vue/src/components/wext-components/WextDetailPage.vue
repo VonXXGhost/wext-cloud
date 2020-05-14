@@ -600,6 +600,7 @@
                 this.loadLikes(1);
             }
             this.loadHas();
+            this.getUserInfo(this.loginUser.id);
         }
     }
 </script>

@@ -39,7 +39,7 @@
                 <el-table-column prop="fullPath" label="完整路径"></el-table-column>
                 <el-table-column prop="state" label="申请状态" width="120"></el-table-column>
                 <el-table-column prop="id" label="申请单ID"></el-table-column>
-                <el-table-column prop="userID" label="申请用户ID"></el-table-column>
+                <el-table-column prop="applicantID" label="申请用户ID"></el-table-column>
                 <el-table-column prop="requestComment" label="申请备注" width="300"></el-table-column>
                 <el-table-column prop="managerName" label="处理人"></el-table-column>
                 <el-table-column prop="manageComment" label="处理备注" width="300"></el-table-column>
@@ -50,11 +50,13 @@
                         label="操作"
                         width="140">
                     <template slot-scope="scope">
-                        <el-button type="text" size="small" @click="choosePR(scope.row.id, 'success')">
+                        <el-button type="text" size="small" @click="choosePR(scope.row.id, 'success')"
+                                   :disabled="scope.row.state !== 'waiting'">
                             同意
                         </el-button>
                         &emsp;
-                        <el-button type="text" size="small" @click="choosePR(scope.row.id, 'reject')">
+                        <el-button type="text" size="small" @click="choosePR(scope.row.id, 'reject')"
+                                   :disabled="scope.row.state !== 'waiting'">
                             拒绝
                         </el-button>
 

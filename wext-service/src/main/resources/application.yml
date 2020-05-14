@@ -58,4 +58,4 @@ wext:
   keyTTL:
     hot-path-cache-hours: 12
   path:
-    hot-path-validDataHours: 4320 # 24 * 30 * 6
+    hot-path-validDataHours: 8760 # 24 * 365
